@@ -27,6 +27,17 @@ window.INVITATION = (function () {
     initials: 'F & V'
   };
 
+  /* Which envelope the invitations go out in: 'airmail' has the striped par
+     avion border and a red wax seal; 'quiet' is plain ivory with a hairline
+     rule and teal wax. Everything else about the piece is identical. */
+  var ENVELOPE = 'airmail';
+
+  var WAX = {
+    airmail: null,
+    quiet: { light: '#2d7f7a', mid: '#175653', dark: '#0c3634',
+      deboss: 'rgba(4,32,30,.7)', emboss: 'rgba(198,238,232,.7)', edge: 'rgba(4,32,30,.45)' }
+  };
+
   var FLIGHT = 'I DO';
   var CLASS = 'First';
 
@@ -76,6 +87,7 @@ window.INVITATION = (function () {
 
       envelopeHint: 'Tap to open',
       envelopeVia: 'By air mail · Par avion',
+      envelopeVia2: 'By air mail',
       envelopePassenger: 'Passenger',
       envelopeOpenLabel: 'Open the envelope',
 
@@ -151,6 +163,7 @@ window.INVITATION = (function () {
 
       envelopeHint: 'Tocca per aprire',
       envelopeVia: 'Posta aerea · Par avion',
+      envelopeVia2: 'Posta aerea',
       envelopePassenger: 'Passeggero',
       envelopeOpenLabel: 'Apri la busta',
 
@@ -296,25 +309,57 @@ window.INVITATION = (function () {
     return '<div class="barcode" aria-hidden="true">' + bars.join('') + '</div>';
   }
 
-  /* Postage stamp, drawn rather than photographed so it prints sharp. The
-     perforations are paper-coloured circles laid over the stamp's edge. */
+  /* Postage stamp: the airline's own mark, engraved. Drawn rather than
+     photographed so it stays sharp in print, with the perforations punched as
+     paper-coloured circles over its edge. */
   function stampSvg(initials, dateLine) {
-    var w = 84, h = 100, step = 12, holes = '';
-    for (var x = step / 2; x < w; x += step) {
-      holes += '<circle cx="' + x + '" cy="0" r="3.1"/><circle cx="' + x + '" cy="' + h + '" r="3.1"/>';
+    var w = 78, h = 94, step = 11, holes = '', x, y;
+    for (x = step / 2; x < w; x += step) {
+      holes += '<circle cx="' + x.toFixed(1) + '" cy="0" r="2.9"/>' +
+               '<circle cx="' + x.toFixed(1) + '" cy="' + h + '" r="2.9"/>';
     }
-    for (var y = step / 2; y < h; y += step) {
-      holes += '<circle cx="0" cy="' + y + '" r="3.1"/><circle cx="' + w + '" cy="' + y + '" r="3.1"/>';
+    for (y = step / 2; y < h; y += step) {
+      holes += '<circle cx="0" cy="' + y.toFixed(1) + '" r="2.9"/>' +
+               '<circle cx="' + w + '" cy="' + y.toFixed(1) + '" r="2.9"/>';
     }
     return '' +
       '<svg class="stamp" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" role="img" aria-hidden="true">' +
-        '<rect x="0" y="0" width="' + w + '" height="' + h + '" fill="#f3ead6"/>' +
-        '<rect x="6" y="6" width="' + (w - 12) + '" height="' + (h - 12) + '" fill="none" stroke="#a83f2a" stroke-width="1.1"/>' +
-        '<path d="M14 62 C 26 34, 58 34, 70 62" fill="none" stroke="#123a4d" stroke-width="1.2"/>' +
-        '<path d="M20 46 l 44 0 M42 30 l 0 12" stroke="#123a4d" stroke-width="1" opacity=".5"/>' +
-        '<text x="' + (w / 2) + '" y="52" text-anchor="middle" font-family="Cormorant Garamond, Garamond, serif" font-size="26" fill="#123a4d">' + esc(initials) + '</text>' +
-        '<text x="' + (w / 2) + '" y="78" text-anchor="middle" font-family="Courier Prime, Courier New, monospace" font-size="8.5" letter-spacing="1" fill="#a83f2a">' + esc(dateLine) + '</text>' +
-        '<g fill="#efe6d3">' + holes + '</g>' +
+        '<rect width="' + w + '" height="' + h + '" fill="#f6eeda"/>' +
+        '<rect x="5" y="5" width="' + (w - 10) + '" height="' + (h - 10) + '" fill="none" ' +
+          'stroke="#a83f2a" stroke-width=".9"/>' +
+        /* engraved sky: fine horizontal rules behind the mark */
+        '<g stroke="#123a4d" stroke-width=".45" opacity=".26">' +
+          '<path d="M9 22 H69 M9 27 H69 M9 32 H69 M9 37 H69 M9 42 H69"/>' +
+        '</g>' +
+        /* the airline mark */
+        '<g transform="translate(39 36) scale(.44) translate(-32 -32)" fill="#123a4d">' +
+          '<circle cx="32" cy="32" r="30" fill="#f6eeda" stroke="#123a4d" stroke-width="1.8"/>' +
+          '<path d="M32 11 c2.6 5 3 14 3 21 v9 c0 4 -1 8 -3 11 c-2 -3 -3 -7 -3 -11 v-9 c0 -7 .4 -16 3 -21 z"/>' +
+          '<path d="M32 27 L11 39 v3.4 L32 35.6 L53 42.4 V39 z"/>' +
+          '<path d="M32 45 L22.5 50.5 v2.2 L32 49.4 l9.5 3.3 v-2.2 z"/>' +
+        '</g>' +
+        '<text x="' + (w / 2) + '" y="66" text-anchor="middle" ' +
+          'font-family="Cormorant Garamond, Garamond, serif" font-size="19" font-weight="600" ' +
+          'fill="#123a4d">' + esc(initials) + '</text>' +
+        '<text x="' + (w / 2) + '" y="82" text-anchor="middle" ' +
+          'font-family="Courier Prime, Courier New, monospace" font-size="7.5" letter-spacing="1" ' +
+          'fill="#a83f2a">' + esc(dateLine) + '</text>' +
+        '<g fill="#f3ecdc">' + holes + '</g>' +
+      '</svg>';
+  }
+
+  /* The cancellation: rings landing over the stamp with the wavy killer bars
+     running off across the empty part of the envelope, the way a real one does. */
+  function postmarkSvg() {
+    return '' +
+      '<svg class="postmark" viewBox="0 0 200 100" width="200" height="100" role="img" aria-hidden="true">' +
+        '<g fill="none" stroke="#9c3d2a" stroke-linecap="round" opacity=".34">' +
+          '<circle cx="155" cy="50" r="38" stroke-width="1.7"/>' +
+          '<circle cx="155" cy="50" r="31" stroke-width=".8"/>' +
+          '<path d="M6 33 q13 -6.5 26 0 t26 0 t26 0 t26 0" stroke-width="2.1"/>' +
+          '<path d="M6 50 q13 -6.5 26 0 t26 0 t26 0 t26 0" stroke-width="2.1"/>' +
+          '<path d="M6 67 q13 -6.5 26 0 t26 0 t26 0 t26 0" stroke-width="2.1"/>' +
+        '</g>' +
       '</svg>';
   }
 
@@ -334,29 +379,81 @@ window.INVITATION = (function () {
       '<svg class="roundel" viewBox="0 0 64 64" width="' + size + '" height="' + size + '" role="img" aria-hidden="true">' +
         '<circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
         '<circle cx="32" cy="32" r="24.5" fill="none" stroke="currentColor" stroke-width=".7" opacity=".45"/>' +
-        /* fuselage */
         '<path d="M32 11 c2.6 5 3 14 3 21 v9 c0 4 -1 8 -3 11 c-2 -3 -3 -7 -3 -11 v-9 c0 -7 .4 -16 3 -21 z" fill="currentColor"/>' +
-        /* swept wings */
         '<path d="M32 27 L11 39 v3.4 L32 35.6 L53 42.4 V39 z" fill="currentColor"/>' +
-        /* tailplane */
         '<path d="M32 45 L22.5 50.5 v2.2 L32 49.4 l9.5 3.3 v-2.2 z" fill="currentColor"/>' +
       '</svg>';
   }
 
-  function postmarkSvg() {
+  /* The flap. Drawn rather than clip-path'd so it can have a softened tip, a
+     gradient across the fold and a proper edge line -- a hard CSS triangle is
+     what made the old envelope look like clip art. */
+  function flapSvg() {
     return '' +
-      '<svg class="postmark" viewBox="0 0 120 120" width="120" height="120" role="img" aria-hidden="true">' +
-        '<circle cx="60" cy="60" r="46" fill="none" stroke="#a83f2a" stroke-width="2" opacity=".55"/>' +
-        '<circle cx="60" cy="60" r="38" fill="none" stroke="#a83f2a" stroke-width="1" opacity=".45"/>' +
-        '<path d="M18 44 h84 M18 76 h84" stroke="#a83f2a" stroke-width="1" opacity=".35"/>' +
-        '<text x="60" y="56" text-anchor="middle" font-family="Courier Prime, Courier New, monospace" font-size="11" letter-spacing="1.5" fill="#a83f2a" opacity=".6">AMS · WDH</text>' +
-        '<text x="60" y="72" text-anchor="middle" font-family="Courier Prime, Courier New, monospace" font-size="11" letter-spacing="1.5" fill="#a83f2a" opacity=".6">BFA MAIL</text>' +
+      '<svg class="env-flap" viewBox="0 0 620 250" preserveAspectRatio="none" aria-hidden="true">' +
+        '<defs>' +
+          '<linearGradient id="bfa-flap" x1="0" y1="0" x2="0" y2="1">' +
+            '<stop offset="0" stop-color="#faf4e7"/>' +
+            '<stop offset=".62" stop-color="#f1e8d5"/>' +
+            '<stop offset="1" stop-color="#e6dabf"/>' +
+          '</linearGradient>' +
+        '</defs>' +
+        '<path d="M0 0 H620 V30 L327 236 Q310 247 293 236 L0 30 Z" fill="url(#bfa-flap)"/>' +
+        '<path d="M620 30 L327 236 Q310 247 293 236 L0 30" fill="none" ' +
+          'stroke="rgba(120,100,64,.34)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>' +
+      '</svg>';
+  }
+
+  /* Sealing wax: an irregular disc with the monogram pressed into it. The old
+     one was a flat CSS circle, which read as a button. */
+  function waxSealSvg(initials, palette) {
+    var pts = [], i, n = 22, seed = 7;
+    for (i = 0; i < n; i++) {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      var wobble = 43.5 + (seed % 1000) / 1000 * 5.5;
+      var a = (i / n) * Math.PI * 2;
+      pts.push([50 + Math.cos(a) * wobble, 50 + Math.sin(a) * wobble]);
+    }
+    var d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+    for (i = 1; i <= n; i++) {
+      var prev = pts[(i - 1) % n], cur = pts[i % n];
+      d += ' Q' + prev[0].toFixed(1) + ' ' + prev[1].toFixed(1) + ' ' +
+        ((prev[0] + cur[0]) / 2).toFixed(1) + ' ' + ((prev[1] + cur[1]) / 2).toFixed(1);
+    }
+    d += ' Z';
+
+    var wax = palette || { light: '#c05a41', mid: '#9d3524', dark: '#6d2016',
+      deboss: 'rgba(46,10,4,.72)', emboss: 'rgba(255,214,192,.72)', edge: 'rgba(58,12,6,.45)' };
+
+    return '' +
+      '<svg class="seal" viewBox="0 0 100 100" role="img" aria-hidden="true">' +
+        '<defs>' +
+          '<radialGradient id="bfa-wax" cx="34%" cy="28%" r="78%">' +
+            '<stop offset="0" stop-color="' + wax.light + '"/>' +
+            '<stop offset=".5" stop-color="' + wax.mid + '"/>' +
+            '<stop offset="1" stop-color="' + wax.dark + '"/>' +
+          '</radialGradient>' +
+        '</defs>' +
+        '<path d="' + d + '" fill="url(#bfa-wax)"/>' +
+        '<path d="' + d + '" fill="none" stroke="' + wax.edge + '" stroke-width="1.6" ' +
+          'transform="translate(0 1.2)" opacity=".5"/>' +
+        '<circle cx="50" cy="50" r="33" fill="none" stroke="rgba(52,12,6,.3)" stroke-width="1"/>' +
+        '<circle cx="50" cy="50" r="33" fill="none" stroke="rgba(255,190,165,.24)" stroke-width="1" ' +
+          'transform="translate(0 -1)"/>' +
+        '<text x="50" y="52.5" text-anchor="middle" dominant-baseline="middle" ' +
+          'font-family="Cormorant Garamond, Garamond, serif" font-size="27" font-weight="600" ' +
+          'fill="' + wax.deboss + '" transform="translate(0 1.3)">' + esc(initials) + '</text>' +
+        '<text x="50" y="52.5" text-anchor="middle" dominant-baseline="middle" ' +
+          'font-family="Cormorant Garamond, Garamond, serif" font-size="27" font-weight="600" ' +
+          'fill="' + wax.emboss + '">' + esc(initials) + '</text>' +
       '</svg>';
   }
 
   return {
     COUPLE: COUPLE,
     FLIGHT: FLIGHT,
+    ENVELOPE: ENVELOPE,
+    WAX: WAX,
     CLASS: CLASS,
     LEGS: LEGS,
     COPY: COPY,
@@ -366,6 +463,8 @@ window.INVITATION = (function () {
     barcode: barcode,
     paperGrain: paperGrain,
     stampSvg: stampSvg,
+    flapSvg: flapSvg,
+    waxSealSvg: waxSealSvg,
     roundelSvg: roundelSvg,
     postmarkSvg: postmarkSvg
   };

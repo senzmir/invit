@@ -222,44 +222,73 @@
 '  mix-blend-mode:multiply;border-radius:inherit}',
 
 /* ---------- the envelope ---------- */
-'.env-wrap{position:relative;z-index:5;width:min(620px,100%);',
+'.env-wrap{position:relative;z-index:5;width:min(600px,100%);',
 '  transition:height .85s cubic-bezier(.3,.75,.25,1) .06s}',
-'.envelope{position:absolute;left:0;top:0;width:100%;aspect-ratio:1.6;perspective:1700px;',
+'.envelope{position:absolute;left:0;top:0;width:100%;aspect-ratio:1.62;perspective:1700px;',
 '  transform-origin:50% 0;transition:transform .85s cubic-bezier(.3,.75,.25,1) .06s,filter .5s}',
-'.env-back{position:absolute;inset:0;border-radius:5px;background:#e3d7bd;',
-'  box-shadow:0 34px 74px -32px rgba(0,0,0,.72)}',
-'.env-front{position:absolute;inset:0;z-index:3;border-radius:5px;',
-'  background:linear-gradient(180deg,#ddd2b8 0,#e8dec8 14%,var(--paper-2) 34%);',
-'  box-shadow:0 8px 18px -14px rgba(0,0,0,.5) inset}',
-'.env-front::before{content:"";position:absolute;inset:0;border-radius:5px;padding:9px;',
-'  background:repeating-linear-gradient(45deg,var(--red) 0 11px,transparent 11px 22px,var(--blue) 22px 33px,transparent 33px 44px);',
+'.env-back{position:absolute;inset:0;border-radius:4px;background:#d9cbaf;',
+'  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 30px 64px -30px rgba(0,0,0,.7)}',
+
+/* the address face */
+'.env-front{position:absolute;inset:0;z-index:3;border-radius:4px;background:var(--paper);',
+'  box-shadow:0 6px 14px -12px rgba(60,44,20,.75) inset,0 -1px 0 rgba(120,100,64,.22) inset}',
+/* the airmail band: fine, and at the edge where it belongs */
+'.env-front::before{content:"";position:absolute;inset:0;border-radius:4px;padding:6px;',
+'  background:repeating-linear-gradient(115deg,var(--red) 0 7px,transparent 7px 15px,',
+'    var(--blue) 15px 22px,transparent 22px 30px);opacity:.72;',
 '  -webkit-mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);',
-'  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);opacity:.85}',
-'.env-address{position:absolute;left:9%;top:56%;max-width:58%;display:flex;flex-direction:column;gap:5px}',
-'.env-address .to{font-family:var(--mono);font-size:10px;letter-spacing:.24em;',
+'  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}',
+
+/* the little blue airmail label, stuck on slightly crooked */
+'.paravion{position:absolute;left:8%;top:50%;display:flex;flex-direction:column;gap:1px;',
+'  padding:5px 11px 6px;background:#eef3f6;border:1px solid rgba(18,58,77,.5);',
+'  transform:rotate(-1.4deg);box-shadow:0 1px 2px rgba(60,44,20,.16)}',
+'.paravion b{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.22em;',
+'  text-transform:uppercase;color:var(--blue);line-height:1}',
+'.paravion i{font-family:var(--mono);font-style:normal;font-size:7.5px;letter-spacing:.16em;',
+'  text-transform:uppercase;color:rgba(18,58,77,.65);line-height:1}',
+
+/* who it is for */
+'.env-address{position:absolute;left:8%;right:36%;top:63%;display:flex;flex-direction:column;gap:6px}',
+'.env-address .to{font-family:var(--mono);font-size:9px;letter-spacing:.26em;',
 '  text-transform:uppercase;color:var(--ink-2)}',
-'.env-address .who{font-size:clamp(21px,3.9vw,31px);font-weight:600;line-height:1.12;color:var(--blue);',
-'  border-bottom:1px solid var(--line);padding-bottom:7px}',
-'.env-address .via{font-family:var(--mono);font-size:9.5px;letter-spacing:.26em;',
-'  text-transform:uppercase;color:var(--red)}',
-'.env-stamp{position:absolute;right:7%;top:52%;transform:rotate(3.2deg);',
-'  filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}',
-'.postmark{position:absolute;right:20%;top:47%;pointer-events:none;transform:rotate(-11deg);opacity:.9}',
-'.env-flap{position:absolute;left:0;top:0;width:100%;height:44%;z-index:6;transform-origin:50% 0;',
-'  background:linear-gradient(180deg,#f4ecdb,#e7dbc2);clip-path:polygon(0 0,100% 0,50% 100%);',
-'  transition:transform 1s cubic-bezier(.6,-.15,.3,1.15),z-index 0s .5s;',
-'  filter:drop-shadow(0 4px 5px rgba(0,0,0,.15))}',
-'.seal{position:absolute;left:50%;top:44%;width:62px;height:62px;margin:-31px 0 0 -31px;z-index:7;',
-'  border-radius:50%;display:grid;place-items:center;color:#f7ecdf;font-size:18px;letter-spacing:.05em;',
-'  background:radial-gradient(circle at 34% 30%,#c05038,#8a2d1a 72%);',
-'  box-shadow:0 4px 12px -3px rgba(0,0,0,.5);transition:opacity .4s,transform .6s}',
+'.env-address .who{font-size:clamp(21px,3.7vw,30px);font-weight:600;line-height:1.14;color:var(--blue);',
+'  border-bottom:1px solid rgba(120,100,64,.4);padding-bottom:8px;letter-spacing:.005em}',
+'.env-address .via{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;',
+'  text-transform:uppercase;color:var(--ink-2)}',
+
+/* stamp, and the cancellation landing across it */
+'.env-stamp{position:absolute;right:7.5%;top:46%;transform:rotate(2.6deg);',
+'  filter:drop-shadow(0 1px 2px rgba(60,44,20,.3))}',
+'.env-postmark{position:absolute;right:5%;top:46%;width:36%;pointer-events:none;',
+'  transform:rotate(-8deg);transform-origin:78% 40%}',
+'.postmark{display:block;width:100%;height:auto}',
+
+/* the flap, and the wax holding it down */
+'.env-flap{position:absolute;left:0;top:0;width:100%;height:40%;z-index:6;display:block;',
+'  transform-origin:50% 0;transition:transform 1s cubic-bezier(.6,-.15,.3,1.15),z-index 0s .5s;',
+'  filter:drop-shadow(0 5px 7px rgba(60,44,20,.22))}',
+'.env-seal{position:absolute;left:50%;top:40%;width:58px;height:58px;margin:-29px 0 0 -29px;',
+'  z-index:7;transition:opacity .45s,transform .6s;',
+'  filter:drop-shadow(0 3px 5px rgba(60,20,10,.45))}',
+'.env-seal .seal{display:block;width:100%;height:100%}',
 '.env-open{position:absolute;inset:0;z-index:8;border:0;background:none;cursor:pointer;',
-'  border-radius:5px;font:inherit;color:transparent}',
+'  border-radius:4px;font:inherit;color:transparent}',
 '.env-open:focus-visible{outline:2px solid #ffd9a0;outline-offset:5px}',
 '.env-hint{position:absolute;left:0;right:0;bottom:-32px;margin:0;text-align:center;color:#d9e4e6;',
 '  font-family:var(--mono);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;',
 '  animation:breathe 3.4s ease-in-out infinite;transition:opacity .4s}',
 '@keyframes breathe{0%,100%{opacity:.32}50%{opacity:.85}}',
+
+/* the quieter envelope: no stripes, a hairline rule, teal wax */
+'body[data-envelope="quiet"] .env-front{background:#f8f2e5}',
+'body[data-envelope="quiet"] .env-front::before{background:none;padding:0;',
+'  border:1px solid rgba(120,100,64,.4);inset:9px;border-radius:2px;opacity:1;',
+'  -webkit-mask:none;mask:none}',
+'body[data-envelope="quiet"] .paravion{display:none}',
+'body[data-envelope="quiet"] .env-address{top:57%}',
+'body[data-envelope="quiet"] .env-address .who{color:#123a4d}',
+
 
 /* ---------- the two things inside it ---------- */
 '.chooser{position:absolute;left:5.5%;right:5.5%;top:0;z-index:2;display:flex;gap:14px;',
@@ -287,7 +316,7 @@
 /* ---------- stages ---------- */
 'body[data-stage="open"] .env-flap,body[data-stage="letter"] .env-flap,body[data-stage="tickets"] .env-flap{',
 '  transform:rotateX(-171deg);z-index:1;transition:transform 1s cubic-bezier(.6,-.15,.3,1.15),z-index 0s .3s}',
-'body[data-stage="open"] .seal,body[data-stage="letter"] .seal,body[data-stage="tickets"] .seal{opacity:0;transform:scale(.55) rotate(-28deg)}',
+'body[data-stage="open"] .env-seal,body[data-stage="letter"] .env-seal,body[data-stage="tickets"] .env-seal{opacity:0;transform:scale(.5) rotate(-32deg)}',
 'body[data-stage="open"] .slip{opacity:1;transform:translateY(-92px)}',
 'body[data-stage="open"] .slip--letter{transition-delay:.34s}',
 'body[data-stage="open"] .slip--tickets{transition-delay:.46s}',
@@ -502,7 +531,10 @@
 '  .pass__grid--top,.pass__grid--bottom{grid-template-columns:1fr 1fr}',
 /* the envelope has little room, so the stamp moves up out of the address's way
    and the cancellation mark steps aside altogether */
-'  .env-address{top:53%;right:9%;max-width:none}',
+'  .paravion{display:none}',
+'  .env-address{top:52%;right:9%;max-width:none}',
+'  .env-postmark{display:none}',
+'  body[data-envelope="quiet"] .env-address{top:52%}',
 '  .env-address .who{font-size:19px}',
 '  .env-stamp{transform:rotate(3.2deg) scale(.46);transform-origin:100% 0;right:5%;top:25%}',
 '  .postmark{display:none}',
@@ -692,6 +724,7 @@
       if (overrides[key]) names[key] = overrides[key];
     });
 
+    var envelope = opts.envelope || I.ENVELOPE;
     var note = String(opts.note || '').trim();
     var fontCss = opts.fontCss || '';
     var passes = I.LEGS.map(function (leg, i) { return pass(leg, t, names, i); }).join('');
@@ -706,23 +739,24 @@
 '<style>\n' + styles(fontCss) + '\n</style>\n' +
 '<noscript><style>.env-wrap{display:none}.panel[hidden]{display:block!important}</style></noscript>\n' +
 '</head>\n' +
-'<body data-stage="sealed">\n' +
+'<body data-stage="sealed" data-envelope="' + envelope + '">\n' +
 
 '<div class="env-wrap">' +
   '<div class="envelope">' +
     '<div class="env-back"></div>' +
     slips(t) +
     '<div class="env-front paper">' +
+      '<span class="paravion"><b>Par avion</b><i>' + esc(t.envelopeVia2) + '</i></span>' +
       '<div class="env-address">' +
         '<span class="to">' + esc(t.envelopePassenger) + '</span>' +
         '<span class="who">' + esc(names.full || t.envelopePassenger) + '</span>' +
-        '<span class="via">' + esc(t.envelopeVia) + '</span>' +
+        '<span class="via">' + esc(t.brand) + ' &nbsp;·&nbsp; ' + esc(t.lFlight) + ' ' + esc(I.FLIGHT) + '</span>' +
       '</div>' +
       '<span class="env-stamp">' + I.stampSvg(I.COUPLE.initials, '28.12.2026') + '</span>' +
-      I.postmarkSvg() +
+      '<span class="env-postmark">' + I.postmarkSvg() + '</span>' +
     '</div>' +
-    '<div class="env-flap"></div>' +
-    '<div class="seal">' + esc(I.COUPLE.initials) + '</div>' +
+    I.flapSvg() +
+    '<div class="env-seal">' + I.waxSealSvg(I.COUPLE.initials, I.WAX[envelope]) + '</div>' +
     '<button type="button" class="env-open" data-stage-to="open">' + esc(t.envelopeOpenLabel) + '</button>' +
     '<button type="button" class="env-back-btn" data-stage-to="open">' + esc(t.backToEnvelope) + '</button>' +
     '<p class="env-hint">' + esc(t.envelopeHint) + '</p>' +
