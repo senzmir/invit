@@ -83,6 +83,10 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
   (or `.png`) and run `python3 tools/build-stamp-art.py`; portrait, roughly 4:5, a few hundred
   pixels wide is plenty. Remove the file and run it again to go back to the flowers.
   The flower colours are the `BLOOM` block at the top of `assets/invitation.js`.
+- **The envelope is the same design at every size.** Everything inside it — type, stamp,
+  cancellation, wax seal — is sized off one `--w` custom property set to the envelope's own
+  width, so a phone gets the same composition as a desktop, just smaller, rather than a
+  re-laid-out one.
 - **Two envelopes.** `ENVELOPE` at the top of [`assets/invitation.js`](assets/invitation.js) is
   `'quiet'`: plain ivory with a hairline plate rule, a drawn flap and a red wax seal with the
   monogram pressed into it. Set it to `'airmail'` for the striped par avion border and its

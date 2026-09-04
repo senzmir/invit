@@ -243,7 +243,10 @@
 '  mix-blend-mode:multiply;border-radius:inherit}',
 
 /* ---------- the envelope ---------- */
-'.env-wrap{position:relative;z-index:5;width:min(600px,100%);',
+/* One width drives everything inside the envelope, so the composition is the
+   same on a phone as on a desktop -- only smaller. It used to re-lay-out
+   under 640px, which is why the phone looked like a different design. */
+'.env-wrap{--w:min(600px,calc(100vw - 32px));position:relative;z-index:5;width:min(600px,100%);',
 '  transition:height .85s cubic-bezier(.3,.75,.25,1) .06s}',
 '.envelope{position:absolute;left:0;top:0;width:100%;aspect-ratio:1.62;perspective:1500px;',
 '  transform-style:preserve-3d;',
@@ -269,26 +272,27 @@
 '.paravion{position:absolute;left:8%;top:50%;display:flex;flex-direction:column;gap:1px;',
 '  padding:5px 11px 6px;background:#eef3f6;border:1px solid rgba(18,58,77,.5);',
 '  transform:rotate(-1.4deg);box-shadow:0 1px 2px rgba(60,44,20,.16)}',
-'.paravion b{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.22em;',
+'.paravion b{font-family:var(--mono);font-size:calc(var(--w) * .0167);font-weight:700;letter-spacing:.22em;',
 '  text-transform:uppercase;color:var(--blue);line-height:1}',
-'.paravion i{font-family:var(--mono);font-style:normal;font-size:7.5px;letter-spacing:.16em;',
+'.paravion i{font-family:var(--mono);font-style:normal;font-size:calc(var(--w) * .0125);letter-spacing:.16em;',
 '  text-transform:uppercase;color:rgba(18,58,77,.65);line-height:1}',
 
 /* who it is for */
 '.env-address{position:absolute;left:8%;right:36%;top:63%;display:flex;flex-direction:column;gap:6px}',
-'.env-address .to{font-family:var(--mono);font-size:9px;letter-spacing:.26em;',
+'.env-address .to{font-family:var(--mono);font-size:calc(var(--w) * .015);letter-spacing:.26em;',
 '  text-transform:uppercase;color:var(--ink-2)}',
-'.env-address .who{font-size:clamp(21px,3.7vw,30px);font-weight:600;line-height:1.14;color:var(--blue);',
-'  border-bottom:1px solid rgba(120,100,64,.4);padding-bottom:8px;letter-spacing:.005em}',
-'.env-address .via{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;',
+'.env-address .who{font-size:calc(var(--w) * .05);font-weight:600;line-height:1.14;color:var(--blue);',
+'  border-bottom:1px solid rgba(120,100,64,.4);padding-bottom:calc(var(--w) * .013);letter-spacing:.005em}',
+'.env-address .via{font-family:var(--mono);font-size:calc(var(--w) * .0142);letter-spacing:.2em;',
 '  text-transform:uppercase;color:var(--ink-2)}',
 
 /* stamp, and the cancellation landing across it */
-'.env-stamp{position:absolute;right:7.5%;top:46%;transform:rotate(2.6deg);',
+'.env-stamp{position:absolute;right:7.5%;top:46%;width:calc(var(--w) * .147);transform:rotate(2.6deg);',
 '  filter:drop-shadow(0 1px 2px rgba(60,44,20,.3))}',
 '.env-postmark{position:absolute;right:4%;top:41%;width:36%;pointer-events:none;',
 '  transform:rotate(-8deg);transform-origin:78% 40%}',
 '.postmark{display:block;width:100%;height:auto}',
+'.stamp{display:block;width:100%;height:auto}',
 
 /* the flap, and the wax holding it down */
 /* The flap is two faces back to back, turning on the fold in the envelope's own
@@ -314,7 +318,8 @@
    instead leaves the seam welded to the top edge and swings the tip over it,
    which is what a flap does. */
 '.env-flap__face--in{transform:rotateY(180deg)}',
-'.env-seal{position:absolute;left:50%;top:40%;width:58px;height:58px;margin:-29px 0 0 -29px;',
+'.env-seal{position:absolute;left:50%;top:40%;width:calc(var(--w) * .0967);aspect-ratio:1;',
+'  margin:calc(var(--w) * -.0484) 0 0 calc(var(--w) * -.0484);',
 '  pointer-events:none;',
 '  transform:translateZ(3px);transition:opacity .35s,transform .6s;',
 '  filter:drop-shadow(0 3px 5px rgba(60,20,10,.45))}',
@@ -618,17 +623,9 @@
 '  .stub__rows{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}',
 '  .stub__tag{margin-top:4px}',
 '  .pass__grid--top,.pass__grid--bottom{grid-template-columns:1fr 1fr}',
-/* the envelope has little room, so the stamp moves up out of the address's way
-   and the cancellation mark steps aside altogether */
-'  .paravion{display:none}',
-'  .env-postmark{display:none}',
-'  .env-address{top:50%;right:9%;max-width:none}',
-'  .env-address .who{font-size:17px;padding-bottom:6px}',
-'  .env-seal{width:44px;height:44px;margin:-22px 0 0 -22px}',
-'  body[data-envelope="quiet"] .env-address{top:50%}',
-'  .env-address .who{font-size:19px}',
-'  .env-stamp{transform:rotate(3.2deg) scale(.46);transform-origin:100% 0;right:5%;top:25%}',
-'  .postmark{display:none}',
+/* The envelope is left alone here: it scales off --w, so it keeps its
+   composition -- stamp bottom right under the cancellation, address bottom left
+   -- all the way down. */
 '  .slip{gap:10px}',
 '  .slip__inner{padding:9px 11px 54px}',
 '  .slip__caption{font-size:8px;letter-spacing:.13em}',
