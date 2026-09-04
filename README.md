@@ -27,12 +27,17 @@ run `node tools/build-minter.js` to rebuild `minter.html`.)
    name needs a hand.
 2. Write a personal note, or leave it empty and the note block disappears.
 3. Pick English or Italiano.
-4. **Download invitation** saves `invitation-<name>.html`. That single file is the whole
+4. **Download invitation** saves `invitation-<name>.html`. On a phone you'll get
+   **Share invitation…** instead as the first button — that hands the file straight to WhatsApp,
+   mail, wherever, without going through a downloads folder. That single file is the whole
    invitation — fonts and artwork travel inside it, it makes no network requests, and it works
    as an email attachment on a plane. Roughly 170 KB.
 
-If your browser blocks the download (Safari sometimes does from `file://`), use **Open in a new
-tab** and save from there, or **Copy the HTML** and paste it into a file yourself.
+If your browser blocks the download (Safari sometimes does from `file://`), use **Share**, **Open
+in a new tab** and save from there, or **Copy the HTML** and paste it into a file yourself.
+
+`minter.html` needs nothing beside it — no `assets/` folder, no network. If you ever see a banner
+saying *“this is the development copy”*, you have opened `index.html` by mistake.
 
 ## Changing the wedding details
 

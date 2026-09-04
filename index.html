@@ -81,8 +81,10 @@
 </header>
 
 <p class="warn" id="loadwarn" hidden>
-  Couldn’t load <code>assets/</code>. Keep <code>index.html</code> next to the <code>assets</code>
-  folder, or serve the folder over http (<code>python3 -m http.server</code>).
+  <b>This is the development copy.</b> It loads its code from the <code>assets/</code> folder next
+  to it, and that folder isn’t here. Open <code>minter.html</code> instead — that one is a single
+  self-contained file and needs nothing beside it. (Rebuild it with
+  <code>node tools/build-minter.js</code> after changing anything under <code>assets/</code>.)
 </p>
 
 <div class="layout">
@@ -131,6 +133,7 @@
     <fieldset>
       <legend>Mint</legend>
       <div class="actions">
+        <button type="button" class="primary" id="share" hidden>Share invitation…</button>
         <button type="button" class="primary" id="download">Download invitation</button>
         <button type="button" id="newtab">Open in a new tab</button>
         <button type="button" id="copy">Copy the HTML</button>
@@ -275,6 +278,28 @@
   });
   Array.prototype.forEach.call(document.querySelectorAll('input[name=lang]'), function (el) {
     el.addEventListener('change', function () { syncDerived(); render(); });
+  });
+
+  /* On a phone there is often nowhere useful to download to, and the browser may
+     refuse a blob download outright. Where the OS share sheet takes files, hand
+     the invitation straight to WhatsApp, mail, wherever. */
+  var shareBtn = document.getElementById('share');
+  function makeFile() {
+    return new File([html()], filename(), { type: 'text/html' });
+  }
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [new File(['.'], 'x.html', { type: 'text/html' })] })) {
+      shareBtn.hidden = false;
+    }
+  } catch (e) { /* no share sheet here */ }
+
+  shareBtn.addEventListener('click', function () {
+    var file;
+    try { file = makeFile(); } catch (e) { say('This browser can’t build the file — use Download.'); return; }
+    navigator.share({ files: [file], title: filename() }).then(
+      function () { say('Shared ' + filename()); },
+      function (err) { if (err && err.name !== 'AbortError') say('Sharing failed — use Download.'); }
+    );
   });
 
   document.getElementById('download').addEventListener('click', function () {
