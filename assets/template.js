@@ -29,14 +29,26 @@
       '</svg>';
   }
 
+  /* Small per-pass irregularities. Real tickets never land dead square, and
+     three identical rectangles read as a table rather than as paper. */
+  var TILTS = [
+    { from: '-2.4deg', rest: '-0.32deg' },
+    { from: '1.9deg', rest: '0.26deg' },
+    { from: '-1.4deg', rest: '-0.18deg' }
+  ];
+
   function pass(leg, t, names, index) {
     var legCopy = t.legs[leg.id];
     var detail = leg.venue || leg.time
       ? [leg.time, leg.venue].filter(Boolean).join(' · ')
       : t.detailsToFollow;
 
+    var tilt = TILTS[index % TILTS.length];
+
     return '' +
-    '<article class="pass" tabindex="0" aria-label="' + esc(t.boardingPass + ' — ' + legCopy.toCity) + '">' +
+    '<article class="pass paper" tabindex="0" aria-label="' + esc(t.boardingPass + ' — ' + legCopy.toCity) + '"' +
+      ' style="--from-tilt:' + tilt.from + ';--rest-tilt:' + tilt.rest +
+      ';--deal-delay:' + (0.14 + index * 0.13).toFixed(2) + 's">' +
       '<div class="pass__main">' +
         '<header class="pass__brand">' +
           '<span class="pass__mark">' + I.roundelSvg(30) + '</span>' +
@@ -121,7 +133,7 @@
       : '';
 
     return '' +
-    '<article class="letter">' +
+    '<article class="letter paper">' +
       '<header class="letter__head">' +
         '<span class="letter__mark">' + I.roundelSvg(46) + '</span>' +
         '<span class="letter__brand">' + esc(t.brand) + '</span>' +
@@ -150,6 +162,7 @@
       '</footer>' +
 
       '<p class="letter__small">' + esc(t.smallPrint) + '</p>' +
+      '<span class="letter__crease" aria-hidden="true"></span>' +
     '</article>';
   }
 
@@ -169,7 +182,7 @@
     return '' +
     '<div class="chooser">' +
       '<button type="button" class="slip slip--letter" data-stage-to="letter" aria-label="' + esc(t.tabLetter) + '">' +
-        '<span class="slip__inner">' +
+        '<span class="slip__inner paper">' +
           '<span class="slip__caption">' + esc(t.tabLetter) + '</span>' +
           '<span class="slip__head">' +
             '<span class="slip__mark">' + I.roundelSvg(24) + '</span>' +
@@ -179,7 +192,7 @@
         '</span>' +
       '</button>' +
       '<button type="button" class="slip slip--tickets" data-stage-to="tickets" aria-label="' + esc(t.tabTickets) + '">' +
-        '<span class="slip__inner">' +
+        '<span class="slip__inner paper">' +
           '<span class="slip__caption">' + esc(t.tabTickets) + '</span>' +
           '<span class="tedges">' + ticketEdges + '</span>' +
         '</span>' +
@@ -198,13 +211,21 @@
 '  display:flex;flex-direction:column;align-items:center}',
 ':root{--paper:#f7f1e3;--paper-2:#efe6d3;--ink:#201c17;--ink-2:#6d6153;',
 '  --line:#cbbca1;--blue:#123a4d;--red:#a83f2a;--gold:#b3893f;',
-'  --mono:"Courier Prime","Courier New",monospace}',
+'  --mono:"Courier Prime","Courier New",monospace;',
+'  --grain:' + I.paperGrain('.82', 4) + '}',
+
+/* Every sheet in the piece carries grain: it is the difference between a cream
+   rectangle and a piece of paper. */
+'.paper{position:relative;isolation:isolate}',
+'.paper::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;',
+'  background-image:var(--grain);background-size:210px 210px;opacity:.3;',
+'  mix-blend-mode:multiply;border-radius:inherit}',
 
 /* ---------- the envelope ---------- */
-'.env-wrap{position:relative;width:min(620px,100%);',
-'  transition:height .75s cubic-bezier(.2,.7,.2,1),margin .75s cubic-bezier(.2,.7,.2,1)}',
+'.env-wrap{position:relative;z-index:5;width:min(620px,100%);',
+'  transition:height .85s cubic-bezier(.3,.75,.25,1) .06s}',
 '.envelope{position:absolute;left:0;top:0;width:100%;aspect-ratio:1.6;perspective:1700px;',
-'  transform-origin:50% 0;transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .5s}',
+'  transform-origin:50% 0;transition:transform .85s cubic-bezier(.3,.75,.25,1) .06s,filter .5s}',
 '.env-back{position:absolute;inset:0;border-radius:5px;background:#e3d7bd;',
 '  box-shadow:0 34px 74px -32px rgba(0,0,0,.72)}',
 '.env-front{position:absolute;inset:0;z-index:3;border-radius:5px;',
@@ -276,11 +297,22 @@
 'body[data-stage="open"] .env-open,body[data-stage="letter"] .env-open,body[data-stage="tickets"] .env-open{display:none}',
 'body:not([data-stage="sealed"]) .env-hint{opacity:0;animation:none}',
 /* the pulled-out slip keeps travelling upward and hands over to the real thing */
+/* The pull happens in two beats. First the paper is drawn right up out of the
+   envelope -- slowly at the start, the way paper drags against paper -- while the
+   envelope stays put. Only then does the envelope sink away and the real thing
+   take over from the slip. */
+'body[data-pull="letter"] .slip--letter,body[data-pull="tickets"] .slip--tickets{',
+'  transform:translateY(-232px) rotate(.6deg);',
+'  transition:transform .46s cubic-bezier(.55,.06,.3,1)}',
+'body[data-pull] .slip{pointer-events:none}',
+'body[data-pull="letter"] .slip--tickets,body[data-pull="tickets"] .slip--letter{',
+'  opacity:.25;transform:translateY(-40px);transition:transform .4s ease,opacity .3s ease}',
 'body[data-stage="letter"] .slip--letter,body[data-stage="tickets"] .slip--tickets{',
-'  transform:translateY(-190px);opacity:0;transition:transform .55s ease-in,opacity .35s ease-in}',
-'body[data-stage="letter"] .slip--tickets,body[data-stage="tickets"] .slip--letter{opacity:0;transform:translateY(20px)}',
+'  transform:translateY(-300px) rotate(1.2deg);opacity:0;',
+'  transition:transform .5s ease-out,opacity .3s ease-out}',
+'body[data-stage="letter"] .slip--tickets,body[data-stage="tickets"] .slip--letter{opacity:0;transform:translateY(10px)}',
 'body[data-stage="letter"] .slip,body[data-stage="tickets"] .slip{pointer-events:none}',
-/* ...while the envelope shrinks to a corner of the page, still clickable to put things back */
+/* ...while the envelope sinks away, still clickable to put things back */
 'body[data-stage="letter"] .envelope,body[data-stage="tickets"] .envelope{transform:scale(.26);cursor:pointer}',
 'body[data-stage="letter"] .envelope:hover,body[data-stage="tickets"] .envelope:hover{filter:brightness(1.08)}',
 '.env-back-btn{position:absolute;inset:0;z-index:9;border:0;background:none;cursor:pointer;color:transparent;',
@@ -291,16 +323,66 @@
 'body[data-stage="letter"] .putback,body[data-stage="tickets"] .putback{opacity:.45}',
 
 /* ---------- what comes out ---------- */
-'.panel{width:min(760px,100%);margin-top:clamp(16px,3vw,30px);',
-'  animation:pullout .85s cubic-bezier(.2,.75,.2,1) both;transform-origin:50% 0}',
-'@keyframes pullout{',
-'  0%{opacity:0;transform:translateY(-46px) scaleY(.55) scaleX(.9)}',
-'  55%{opacity:1}',
-'  100%{opacity:1;transform:none}}',
+'.panel{position:relative;z-index:1;width:min(760px,100%);margin-top:clamp(16px,3vw,30px)}',
+
+/* ---------- the letter unfolds ----------
+   A letter arrives folded. The scaffold below is two clipped copies of the real
+   letter, hinged along the crease: the bottom half starts folded back behind the
+   top half and swings down. It is built, run and thrown away by the script; the
+   real letter underneath is what print and screen readers get. */
+'.fold{position:relative;height:var(--half);perspective:2400px;transform-origin:50% 0;',
+'  transition:height .78s cubic-bezier(.25,.85,.3,1);',
+'  animation:slideout .68s cubic-bezier(.45,.03,.2,1) both}',
+'.fold.is-open{height:var(--full)}',
+/* drawn up out of the envelope: slow to start, the way paper drags on paper */
+'@keyframes slideout{',
+'  0%{transform:translateY(-232px) rotate(1.6deg) scale(.9)}',
+'  70%{transform:translateY(-14px) rotate(-.35deg) scale(1)}',
+'  100%{transform:none}}',
+'.fold__panel{position:absolute;left:0;right:0;height:var(--half);overflow:hidden;',
+'  backface-visibility:hidden;-webkit-backface-visibility:hidden}',
+'.fold__panel--top{top:0}',
+'.fold__panel--bottom{top:var(--half);transform-origin:50% 0;transform:rotateX(-180deg);',
+'  transition:transform .78s cubic-bezier(.25,.85,.3,1)}',
+'.fold.is-open .fold__panel--bottom{transform:rotateX(0)}',
+'.fold__sheet{position:absolute;left:0;right:0;top:0}',
+'.fold__panel--bottom .fold__sheet{top:calc(var(--half) * -1)}',
+/* the shadow the folded half throws on the half beneath it, lifting as it opens */
+/* the shadow the folded-back half throws along the crease, lifting as it opens */
+'.fold__shade{position:absolute;left:0;right:0;top:0;height:var(--half);pointer-events:none;',
+'  z-index:4;background:linear-gradient(180deg,rgba(58,42,18,0) 48%,rgba(58,42,18,.07) 74%,rgba(58,42,18,.3));',
+'  opacity:1;transition:opacity .55s ease-out .1s}',
+'.fold.is-open .fold__shade{opacity:0}',
+/* the swinging half is turned away from the light until it lies flat */
+'.fold__panel--bottom::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;',
+'  background:linear-gradient(180deg,rgba(58,42,18,.26),rgba(58,42,18,.04));',
+'  opacity:1;transition:opacity .6s ease-out}',
+'.fold.is-open .fold__panel--bottom::after{opacity:0}',
+/* paper remembers its crease */
+'.letter{--crease:0}',
+'.letter__crease{position:absolute;left:0;right:0;top:50%;height:3px;pointer-events:none;z-index:2;',
+'  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(120,98,60,.16) 55%,rgba(255,255,255,.3));',
+'  opacity:.75}',
+
+/* ---------- the passes are dealt out ---------- */
+'.panel--tickets .pass{animation:deal .72s cubic-bezier(.24,.86,.3,1) both;',
+'  animation-delay:var(--deal-delay,0s)}',
+'@keyframes deal{',
+'  0%{opacity:0;transform:translateY(-230px) scale(.86) rotate(var(--from-tilt,0deg))}',
+'  22%{opacity:1}',
+'  72%{transform:translateY(9px) scale(1.01) rotate(calc(var(--rest-tilt,0deg) * 1.7))}',
+'  100%{opacity:1;transform:translateY(0) scale(1) rotate(var(--rest-tilt,0deg))}}',
+'.tearline{animation:fadein .5s ease both}',
+/* and back in it goes */
+'.panel.is-returning{animation:slidein .42s cubic-bezier(.4,.02,.72,1) both}',
+'@keyframes slidein{from{opacity:1;transform:none}',
+'  to{opacity:0;transform:translateY(-236px) scale(.9) rotate(-1.1deg)}}',
+'@keyframes fadein{from{opacity:0}to{opacity:1}}',
 
 /* ---------- letter ---------- */
-'.letter{background:var(--paper);border-radius:3px;padding:clamp(26px,5vw,56px);',
-'  box-shadow:0 40px 80px -40px rgba(0,0,0,.7);line-height:1.6;font-size:clamp(17px,2.1vw,19px)}',
+'.letter{position:relative;background:var(--paper);border-radius:2px;padding:clamp(26px,5vw,56px);',
+'  box-shadow:0 1px 1px rgba(0,0,0,.3),0 34px 54px -26px rgba(0,0,0,.62);',
+'  line-height:1.6;font-size:clamp(17px,2.1vw,19px)}',
 '.letter__head{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--blue);text-align:center}',
 '.letter__brand{font-size:clamp(23px,3.6vw,30px);font-weight:700;letter-spacing:.02em}',
 '.letter__strap{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2)}',
@@ -337,9 +419,20 @@
 '  background:transparent;color:#dfe9ea;transition:background .2s,color .2s,border-color .2s}',
 '.tearoff:hover{background:var(--paper);color:var(--blue);border-color:transparent}',
 '.tearoff:focus-visible{outline:2px solid #ffd9a0;outline-offset:3px}',
-'.pass{display:flex;background:var(--paper);border-radius:4px;margin:0 0 22px;overflow:hidden;',
-'  box-shadow:0 32px 60px -34px rgba(0,0,0,.75);transition:transform .35s,box-shadow .35s}',
-'.pass:hover,.pass:focus-visible{transform:translateY(-4px);box-shadow:0 40px 70px -34px rgba(0,0,0,.85);outline:none}',
+/* --stub is both the stub's width and where the tear line falls, so the punched
+   notches at top and bottom line up with the perforation between them. */
+'.pass{--stub:186px;display:flex;background:var(--paper);border-radius:4px;margin:0 0 24px;',
+'  filter:drop-shadow(0 2px 1px rgba(0,0,0,.28)) drop-shadow(0 26px 34px rgba(0,0,0,.4));',
+'  transition:transform .35s cubic-bezier(.2,.8,.3,1),filter .35s;',
+'  -webkit-mask-image:radial-gradient(circle 9px at right var(--stub) top,transparent 97%,#000),',
+'    radial-gradient(circle 9px at right var(--stub) bottom,transparent 97%,#000);',
+'  -webkit-mask-size:100% 50.5%;-webkit-mask-position:top,bottom;-webkit-mask-repeat:no-repeat;',
+'  mask-image:radial-gradient(circle 9px at right var(--stub) top,transparent 97%,#000),',
+'    radial-gradient(circle 9px at right var(--stub) bottom,transparent 97%,#000);',
+'  mask-size:100% 50.5%;mask-position:top,bottom;mask-repeat:no-repeat}',
+'.pass:hover,.pass:focus-visible{outline:none;',
+'  transform:translateY(-5px) rotate(var(--rest-tilt,0deg));',
+'  filter:drop-shadow(0 3px 2px rgba(0,0,0,.26)) drop-shadow(0 38px 44px rgba(0,0,0,.46))}',
 '.pass__main{flex:1 1 auto;padding:clamp(18px,3vw,26px);min-width:0}',
 '.pass__brand{display:flex;align-items:center;gap:11px;color:var(--blue);padding-bottom:12px;border-bottom:1px solid var(--line)}',
 '.pass__mark{display:flex;flex:none}',
@@ -371,8 +464,14 @@
 '.pass__occasion p{margin:0;font-size:15.5px;line-height:1.5;color:#4a4137}',
 '.pass__follow{margin-top:8px!important;font-family:var(--mono);font-size:10px;',
 '  letter-spacing:.2em;text-transform:uppercase;color:var(--red)}',
-'.pass__stub{flex:0 0 186px;padding:clamp(16px,2.4vw,20px);background:#f1e8d5;',
-'  border-left:2px dashed rgba(120,105,80,.45);display:flex;flex-direction:column;gap:11px}',
+'.pass__stub{position:relative;flex:0 0 var(--stub);padding:clamp(16px,2.4vw,20px);',
+'  background:#f1e8d5;display:flex;flex-direction:column;gap:11px}',
+/* the perforation: punched dots, not a dashed rule */
+'.pass__stub::before{content:"";position:absolute;left:-5px;top:10px;bottom:10px;width:10px;z-index:2;',
+'  background-image:radial-gradient(circle at 50% 5px,rgba(96,80,52,.34) 0 2.1px,transparent 2.4px);',
+'  background-size:10px 11px;background-repeat:repeat-y}',
+'.pass__stub::after{content:"";position:absolute;left:0;top:0;bottom:0;width:1px;',
+'  background:linear-gradient(180deg,transparent,rgba(255,255,255,.7) 12%,rgba(255,255,255,.7) 88%,transparent)}',
 '.stub__brand{font-size:13px;font-weight:700;color:var(--blue);line-height:1.15}',
 '.stub__rows{display:flex;flex-direction:column;gap:6px}',
 '.stub__row{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-family:var(--mono);',
@@ -389,8 +488,15 @@
 
 /* ---------- small screens ---------- */
 '@media (max-width:640px){',
-'  .pass{flex-direction:column}',
-'  .pass__stub{flex:none;border-left:0;border-top:2px dashed rgba(120,105,80,.45)}',
+/* stacked layout: the tear line runs across the ticket, so the punched dots move
+   with it and the corner notches step aside */
+'  .pass{flex-direction:column;-webkit-mask-image:none;mask-image:none}',
+'  .pass__stub{flex:none}',
+'  .pass__stub::before{left:10px;right:10px;top:-5px;bottom:auto;width:auto;height:10px;',
+'    background-image:radial-gradient(circle at 5px 50%,rgba(96,80,52,.34) 0 2.1px,transparent 2.4px);',
+'    background-size:11px 10px;background-repeat:repeat-x}',
+'  .pass__stub::after{left:0;right:0;top:0;bottom:auto;width:auto;height:1px;',
+'    background:linear-gradient(90deg,transparent,rgba(255,255,255,.7) 12%,rgba(255,255,255,.7) 88%,transparent)}',
 '  .stub__rows{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}',
 '  .stub__tag{margin-top:4px}',
 '  .pass__grid--top,.pass__grid--bottom{grid-template-columns:1fr 1fr}',
@@ -421,9 +527,11 @@
 '  body{background:#fff!important;background-image:none!important;padding:0;display:block}',
 '  .env-wrap,.putback,.pagefoot,.tearline,.tickets__intro,.panel--letter{display:none!important}',
 '  .panel--tickets,.panel--tickets[hidden]{display:block!important;width:100%;margin:0;animation:none}',
-'  .pass{break-inside:avoid;page-break-inside:avoid;box-shadow:none;border:1px solid #b9a888;',
-'    margin:0 0 8mm;border-radius:0}',
+'  .pass{break-inside:avoid;page-break-inside:avoid;box-shadow:none;filter:none;',
+'    -webkit-mask-image:none;mask-image:none;border:1px solid #b9a888;',
+'    margin:0 0 8mm;border-radius:0;animation:none;transform:none}',
 '  .pass:hover{transform:none}',
+'  .paper::after{display:none}',
 '  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}',
 '  @page{size:A4 portrait;margin:12mm}',
 '}'
@@ -438,27 +546,114 @@
       '  var envelope=document.querySelector(".envelope");',
       '  var letterPanel=document.getElementById("panel-letter");',
       '  var ticketPanel=document.getElementById("panel-tickets");',
+      '  var realLetter=letterPanel.querySelector(".letter");',
       '  var SHRUNK=0.26;',
+      '  var PULL=190;   /* the grab, before the paper itself takes over */',
+      '  var reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;',
+      '  var timers=[];',
       '',
-      '  /* The envelope keeps its natural size in layout; when it shrinks we hand the',
-      '     wrapper the reduced height so the page closes up around it. */',
+      '  function after(ms,fn){timers.push(setTimeout(fn,reduced?0:ms));}',
+      '  function clearTimers(){timers.forEach(clearTimeout);timers=[];}',
+      '',
+      '  /* The envelope keeps its natural size in layout; when it shrinks away we',
+      '     hand the wrapper the reduced height so the page closes up around it. */',
       '  function sizeWrap(stage){',
       '    var natural=envelope.offsetHeight;',
-      '    if(!natural){return;}',
+      '    if(!natural)return;',
       '    var out=stage==="letter"||stage==="tickets";',
       '    wrap.style.height=(out?Math.round(natural*SHRUNK):natural)+"px";',
       '  }',
       '',
-      '  function setStage(stage){',
+      '  /* A letter arrives folded in half. Two clipped copies of the real letter,',
+      '     hinged along the crease, do the opening; then the real one takes their',
+      '     place so that print, selection and screen readers get a single letter. */',
+      '  function unfold(){',
+      '    var old=letterPanel.querySelector(".fold");',
+      '    if(old)old.remove();',
+      '    realLetter.style.display="";',
+      '    if(reduced)return;',
+      '',
+      '    var full=realLetter.offsetHeight;',
+      '    if(!full)return;',
+      '    var half=Math.round(full/2);',
+      '',
+      '    var fold=document.createElement("div");',
+      '    fold.className="fold";',
+      '    fold.setAttribute("aria-hidden","true");',
+      '    fold.style.setProperty("--full",full+"px");',
+      '    fold.style.setProperty("--half",half+"px");',
+      '',
+      '    ["top","bottom"].forEach(function(which){',
+      '      var panel=document.createElement("div");',
+      '      panel.className="fold__panel fold__panel--"+which;',
+      '      var sheet=document.createElement("div");',
+      '      sheet.className="fold__sheet";',
+      '      sheet.appendChild(realLetter.cloneNode(true));',
+      '      panel.appendChild(sheet);',
+      '      fold.appendChild(panel);',
+      '    });',
+      '    var shade=document.createElement("div");',
+      '    shade.className="fold__shade";',
+      '    fold.appendChild(shade);',
+      '',
+      '    realLetter.style.display="none";',
+      '    letterPanel.appendChild(fold);',
+      '',
+      '    /* one frame folded, so the eye sees the packet before it opens */',
+      '    /* it stays folded while it clears the envelope, then opens */',
+      '    after(520,function(){fold.classList.add("is-open");});',
+      '    after(1650,function(){',
+      '      if(!fold.isConnected)return;',
+      '      realLetter.style.display="";',
+      '      fold.remove();',
+      '    });',
+      '  }',
+      '',
+      '  function show(stage){',
+      '    body.removeAttribute("data-pull");',
+      '    /* a half-finished put-back must not leave a panel stuck invisible */',
+      '    letterPanel.classList.remove("is-returning");',
+      '    ticketPanel.classList.remove("is-returning");',
       '    body.setAttribute("data-stage",stage);',
       '    letterPanel.hidden=stage!=="letter";',
       '    ticketPanel.hidden=stage!=="tickets";',
       '    sizeWrap(stage);',
-      '    if(stage==="letter"||stage==="tickets"){',
-      '      var panel=stage==="letter"?letterPanel:ticketPanel;',
-      '      panel.style.animation="none";void panel.offsetWidth;panel.style.animation="";',
-      '      window.scrollTo({top:0,behavior:"smooth"});',
+      '    if(stage==="letter")unfold();',
+      '    if(stage==="tickets"){',
+      '      /* restart the deal so the passes always come out of the envelope */',
+      '      Array.prototype.forEach.call(ticketPanel.querySelectorAll(".pass,.tearline"),function(el){',
+      '        el.style.animation="none";void el.offsetWidth;el.style.animation="";',
+      '      });',
       '    }',
+      '  }',
+      '',
+      '  function setStage(stage){',
+      '    clearTimers();',
+      '    if(stage==="letter"||stage==="tickets"){',
+      '      /* beat one: draw the paper out while the envelope is still full size */',
+      '      body.setAttribute("data-pull",stage);',
+      '      after(PULL,function(){show(stage);window.scrollTo({top:0,behavior:"smooth"});});',
+      '      if(reduced)return;',
+      '      return;',
+      '    }',
+      '    /* going back: the paper slides in behind the envelope as it grows again */',
+      '    var was=body.getAttribute("data-stage");',
+      '    var open=was==="letter"||was==="tickets";',
+      '    var panel=was==="letter"?letterPanel:ticketPanel;',
+      '    body.removeAttribute("data-pull");',
+      '    body.setAttribute("data-stage",stage);',
+      '    sizeWrap(stage);',
+      '    function tidy(){',
+      '      var fold=letterPanel.querySelector(".fold");',
+      '      if(fold)fold.remove();',
+      '      realLetter.style.display="";',
+      '      panel.classList.remove("is-returning");',
+      '      letterPanel.hidden=true;',
+      '      ticketPanel.hidden=true;',
+      '    }',
+      '    if(!open||reduced){tidy();return;}',
+      '    panel.classList.add("is-returning");',
+      '    after(430,tidy);',
       '  }',
       '',
       '  Array.prototype.forEach.call(document.querySelectorAll("[data-stage-to]"),function(el){',
@@ -466,7 +661,7 @@
       '  });',
       '',
       '  var printBtn=document.getElementById("btn-print");',
-      '  if(printBtn){printBtn.addEventListener("click",function(){window.print();});}',
+      '  if(printBtn)printBtn.addEventListener("click",function(){window.print();});',
       '',
       '  document.addEventListener("keydown",function(e){',
       '    if(e.key!=="Escape")return;',
@@ -517,7 +712,7 @@
   '<div class="envelope">' +
     '<div class="env-back"></div>' +
     slips(t) +
-    '<div class="env-front">' +
+    '<div class="env-front paper">' +
       '<div class="env-address">' +
         '<span class="to">' + esc(t.envelopePassenger) + '</span>' +
         '<span class="who">' + esc(names.full || t.envelopePassenger) + '</span>' +

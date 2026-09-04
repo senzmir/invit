@@ -69,8 +69,18 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
 
 - **Interaction is physical, not chrome.** There is no navigation bar. Click the envelope to
   break the seal, then pull out the letter or the stack of passes by clicking the paper itself.
-  Click the shrunken envelope at the top to put things back; `Esc` does the same.
+  Click the shrunken envelope at the top to put things back; `Esc` does the same, and the paper
+  slides back in behind the envelope as it grows.
+- **The letter arrives folded and opens on its crease.** The fold is real: two clipped copies of
+  the letter, hinged along the middle, with the bottom half folded back behind the top one. It
+  swings down, the shadow along the crease lifts, and then the scaffold is thrown away and the
+  actual letter takes its place — so print, text selection and screen readers only ever see one
+  letter. The faint crease line across the middle stays, the way paper remembers a fold.
+- **The passes are dealt out** of the envelope one after another, each landing at a slightly
+  different angle. They have punched perforations and notched corners along the tear line, and
+  every sheet in the piece carries a fine paper grain.
 - **Print** gives you the three passes on A4 and nothing else — no envelope, no letter, no
-  buttons.
+  buttons, no grain.
 - Works with JavaScript off (the letter and passes are simply laid out down the page), respects
-  `prefers-reduced-motion`, and reads down to 340px wide.
+  `prefers-reduced-motion` — which skips the fold and the deal entirely — and reads down to
+  340px wide.

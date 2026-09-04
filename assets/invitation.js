@@ -318,6 +318,17 @@ window.INVITATION = (function () {
       '</svg>';
   }
 
+  /* Paper grain. A little fractal noise laid over the flat colour is the
+     difference between "a cream rectangle" and "a sheet of paper". */
+  function paperGrain(baseFrequency, octaves) {
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'>" +
+      "<filter id='g'><feTurbulence type='fractalNoise' baseFrequency='" + baseFrequency +
+      "' numOctaves='" + octaves + "' stitchTiles='stitch'/>" +
+      "<feColorMatrix type='saturate' values='0'/></filter>" +
+      "<rect width='220' height='220' filter='url(%23g)'/></svg>";
+    return "url(\"data:image/svg+xml," + svg.replace(/</g, '%3C').replace(/>/g, '%3E').replace(/#/g, '%23') + "\")";
+  }
+
   function roundelSvg(size) {
     return '' +
       '<svg class="roundel" viewBox="0 0 64 64" width="' + size + '" height="' + size + '" role="img" aria-hidden="true">' +
@@ -353,6 +364,7 @@ window.INVITATION = (function () {
     nameForms: nameForms,
     slugify: slugify,
     barcode: barcode,
+    paperGrain: paperGrain,
     stampSvg: stampSvg,
     roundelSvg: roundelSvg,
     postmarkSvg: postmarkSvg
