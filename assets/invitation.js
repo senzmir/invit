@@ -387,20 +387,29 @@ window.INVITATION = (function () {
       '</svg>';
   }
 
-  /* The flap. Drawn rather than clip-path'd so it can have a softened tip, a
-     gradient across the fold and a proper edge line -- a hard CSS triangle is
-     what made the old envelope look like clip art. */
-  function flapSvg() {
+  /* The flap, drawn as two faces so it can turn over honestly: the outside you
+     see when it is sealed, and the paler inside you see once it is open. Both
+     are SVG so the tip can be softened and the fold can carry a gradient -- a
+     hard CSS triangle is what made the old envelope look like clip art. */
+  function flapSvg(face) {
+    var fill = face === 'in'
+      ? '<linearGradient id="bfa-flap-in" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0" stop-color="#dccfb2"/>' +
+          '<stop offset=".55" stop-color="#e7dcc3"/>' +
+          '<stop offset="1" stop-color="#f2e9d6"/>' +
+        '</linearGradient>'
+      : '<linearGradient id="bfa-flap-out" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0" stop-color="#faf4e7"/>' +
+          '<stop offset=".62" stop-color="#f1e8d5"/>' +
+          '<stop offset="1" stop-color="#e6dabf"/>' +
+        '</linearGradient>';
+    var id = face === 'in' ? 'bfa-flap-in' : 'bfa-flap-out';
+
     return '' +
-      '<svg class="env-flap" viewBox="0 0 620 250" preserveAspectRatio="none" aria-hidden="true">' +
-        '<defs>' +
-          '<linearGradient id="bfa-flap" x1="0" y1="0" x2="0" y2="1">' +
-            '<stop offset="0" stop-color="#faf4e7"/>' +
-            '<stop offset=".62" stop-color="#f1e8d5"/>' +
-            '<stop offset="1" stop-color="#e6dabf"/>' +
-          '</linearGradient>' +
-        '</defs>' +
-        '<path d="M0 0 H620 V30 L327 236 Q310 247 293 236 L0 30 Z" fill="url(#bfa-flap)"/>' +
+      '<svg class="env-flap__face env-flap__face--' + (face === 'in' ? 'in' : 'out') + '" ' +
+        'viewBox="0 0 620 250" preserveAspectRatio="none" aria-hidden="true">' +
+        '<defs>' + fill + '</defs>' +
+        '<path d="M0 0 H620 V30 L327 236 Q310 247 293 236 L0 30 Z" fill="url(#' + id + ')"/>' +
         '<path d="M620 30 L327 236 Q310 247 293 236 L0 30" fill="none" ' +
           'stroke="rgba(120,100,64,.34)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>' +
       '</svg>';

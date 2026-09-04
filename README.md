@@ -86,7 +86,9 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
   monogram pressed into it. Set it to `'airmail'` for the striped par avion border and its
   little blue label instead. Everything else is identical.
 - **Interaction is physical, not chrome.** There is no navigation bar. Click the envelope to
-  break the seal, then pull out the letter or the stack of passes by clicking the paper itself.
+  break the seal: the flap turns over on its fold, then the letter rises out of the middle
+  with the boarding passes lying across it at an angle, their corner sticking out. Pull out
+  whichever you want by clicking the paper itself.
   Click the shrunken envelope at the top to put things back; `Esc` does the same, and the paper
   slides back in behind the envelope as it grows.
 - **The letter arrives folded and opens on its crease.** The fold is real: two clipped copies of

@@ -566,20 +566,29 @@ window.INVITATION = (function () {
       '</svg>';
   }
 
-  /* The flap. Drawn rather than clip-path'd so it can have a softened tip, a
-     gradient across the fold and a proper edge line -- a hard CSS triangle is
-     what made the old envelope look like clip art. */
-  function flapSvg() {
+  /* The flap, drawn as two faces so it can turn over honestly: the outside you
+     see when it is sealed, and the paler inside you see once it is open. Both
+     are SVG so the tip can be softened and the fold can carry a gradient -- a
+     hard CSS triangle is what made the old envelope look like clip art. */
+  function flapSvg(face) {
+    var fill = face === 'in'
+      ? '<linearGradient id="bfa-flap-in" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0" stop-color="#dccfb2"/>' +
+          '<stop offset=".55" stop-color="#e7dcc3"/>' +
+          '<stop offset="1" stop-color="#f2e9d6"/>' +
+        '</linearGradient>'
+      : '<linearGradient id="bfa-flap-out" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0" stop-color="#faf4e7"/>' +
+          '<stop offset=".62" stop-color="#f1e8d5"/>' +
+          '<stop offset="1" stop-color="#e6dabf"/>' +
+        '</linearGradient>';
+    var id = face === 'in' ? 'bfa-flap-in' : 'bfa-flap-out';
+
     return '' +
-      '<svg class="env-flap" viewBox="0 0 620 250" preserveAspectRatio="none" aria-hidden="true">' +
-        '<defs>' +
-          '<linearGradient id="bfa-flap" x1="0" y1="0" x2="0" y2="1">' +
-            '<stop offset="0" stop-color="#faf4e7"/>' +
-            '<stop offset=".62" stop-color="#f1e8d5"/>' +
-            '<stop offset="1" stop-color="#e6dabf"/>' +
-          '</linearGradient>' +
-        '</defs>' +
-        '<path d="M0 0 H620 V30 L327 236 Q310 247 293 236 L0 30 Z" fill="url(#bfa-flap)"/>' +
+      '<svg class="env-flap__face env-flap__face--' + (face === 'in' ? 'in' : 'out') + '" ' +
+        'viewBox="0 0 620 250" preserveAspectRatio="none" aria-hidden="true">' +
+        '<defs>' + fill + '</defs>' +
+        '<path d="M0 0 H620 V30 L327 236 Q310 247 293 236 L0 30 Z" fill="url(#' + id + ')"/>' +
         '<path d="M620 30 L327 236 Q310 247 293 236 L0 30" fill="none" ' +
           'stroke="rgba(120,100,64,.34)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>' +
       '</svg>';
@@ -825,31 +834,36 @@ window.INVITATION = (function () {
   /* The two things sitting inside the envelope. They are the interface: the
      letter's folded top edge and the edges of the three passes stick up out of
      the envelope mouth, and you pull the one you want. No navigation chrome. */
+  /* What is inside the envelope, and the only way in. The letter sits square in
+     the middle and comes up first; the passes are tucked in beside it, angled,
+     and only their corner shows -- which is what you actually see when you open
+     an envelope with both in it. */
   function slips(t) {
     var ticketEdges = I.LEGS.map(function (leg, i) {
       var legCopy = t.legs[leg.id];
       return '<span class="tedge tedge--' + i + '">' +
-        '<b>' + esc(leg.to) + '</b>' +
         '<i>' + esc(legCopy.date) + '</i>' +
+        '<b>' + esc(leg.to) + '</b>' +
       '</span>';
     }).join('');
 
     return '' +
     '<div class="chooser">' +
-      '<button type="button" class="slip slip--letter" data-stage-to="letter" aria-label="' + esc(t.tabLetter) + '">' +
-        '<span class="slip__inner paper">' +
-          '<span class="slip__caption">' + esc(t.tabLetter) + '</span>' +
-          '<span class="slip__head">' +
-            '<span class="slip__mark">' + I.roundelSvg(24) + '</span>' +
-            '<span class="slip__brand">' + esc(t.brand) + '</span>' +
-          '</span>' +
-          '<span class="slip__rule"></span>' +
-        '</span>' +
-      '</button>' +
       '<button type="button" class="slip slip--tickets" data-stage-to="tickets" aria-label="' + esc(t.tabTickets) + '">' +
         '<span class="slip__inner paper">' +
           '<span class="slip__caption">' + esc(t.tabTickets) + '</span>' +
           '<span class="tedges">' + ticketEdges + '</span>' +
+        '</span>' +
+      '</button>' +
+      '<button type="button" class="slip slip--letter" data-stage-to="letter" aria-label="' + esc(t.tabLetter) + '">' +
+        '<span class="slip__inner paper">' +
+          '<span class="slip__caption">' + esc(t.tabLetter) + '</span>' +
+          '<span class="slip__head">' +
+            '<span class="slip__mark">' + I.roundelSvg(26) + '</span>' +
+            '<span class="slip__brand">' + esc(t.brand) + '</span>' +
+          '</span>' +
+          '<span class="slip__rule"></span>' +
+          '<span class="slip__rule slip__rule--short"></span>' +
         '</span>' +
       '</button>' +
     '</div>';
@@ -859,7 +873,8 @@ window.INVITATION = (function () {
     return fontCss + '\n' + [
 '*,*::before,*::after{box-sizing:border-box}',
 'html{-webkit-text-size-adjust:100%}',
-'body{margin:0;padding:clamp(124px,16vh,170px) 16px 96px;min-height:100vh;',
+/* headroom for the letter and the passes to rise out of the envelope */
+'body{margin:0;padding:clamp(168px,18vh,196px) 16px 96px;min-height:100vh;',
 '  font-family:"Cormorant Garamond",Garamond,"Hoefler Text","Times New Roman",serif;',
 '  color:#201c17;background:#0a1f27;',
 '  display:flex;flex-direction:column;align-items:center;position:relative}',
@@ -893,13 +908,15 @@ window.INVITATION = (function () {
 /* ---------- the envelope ---------- */
 '.env-wrap{position:relative;z-index:5;width:min(600px,100%);',
 '  transition:height .85s cubic-bezier(.3,.75,.25,1) .06s}',
-'.envelope{position:absolute;left:0;top:0;width:100%;aspect-ratio:1.62;perspective:1700px;',
+'.envelope{position:absolute;left:0;top:0;width:100%;aspect-ratio:1.62;perspective:1500px;',
+'  transform-style:preserve-3d;',
 '  transform-origin:50% 0;transition:transform .85s cubic-bezier(.3,.75,.25,1) .06s,filter .5s}',
-'.env-back{position:absolute;inset:0;border-radius:4px;background:#d9cbaf;',
+'.env-back{position:absolute;inset:0;border-radius:4px;background:#d9cbaf;pointer-events:none;',
 '  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 30px 64px -30px rgba(0,0,0,.7)}',
 
 /* the address face */
 '.env-front{position:absolute;inset:0;z-index:3;border-radius:4px;background:var(--paper);',
+'  pointer-events:none;',
 '  box-shadow:0 6px 14px -12px rgba(60,44,20,.75) inset,0 -1px 0 rgba(120,100,64,.22) inset}',
 /* lighter grain here than on the letter, so the face keeps the warmth of the
    drawn flap instead of drifting grey next to it */
@@ -937,14 +954,23 @@ window.INVITATION = (function () {
 '.postmark{display:block;width:100%;height:auto}',
 
 /* the flap, and the wax holding it down */
-'.env-flap{position:absolute;left:0;top:0;width:100%;height:40%;z-index:6;display:block;',
-'  transform-origin:50% 0;transition:transform 1s cubic-bezier(.6,-.15,.3,1.15),z-index 0s .5s;',
-'  filter:drop-shadow(0 5px 7px rgba(60,44,20,.22))}',
+/* The flap is two faces back to back, turning on the fold in the envelope's own
+   3D space. No z-index is swapped part-way through -- that swap was the glitch;
+   once it passes upright the browser sorts it behind the front on its own. */
+'.env-flap{position:absolute;left:0;top:0;width:100%;height:40%;pointer-events:none;',
+'  transform-style:preserve-3d;transform-origin:50% 0;transform:translateZ(2px) rotateX(0deg);',
+'  transition:transform .95s cubic-bezier(.36,.02,.2,1)}',
+'.env-flap__face{position:absolute;inset:0;width:100%;height:100%;display:block;',
+'  backface-visibility:hidden;-webkit-backface-visibility:hidden}',
+'.env-flap__face--out{filter:drop-shadow(0 5px 7px rgba(60,44,20,.2))}',
+'.env-flap__face--in{transform:rotateX(180deg)}',
 '.env-seal{position:absolute;left:50%;top:40%;width:58px;height:58px;margin:-29px 0 0 -29px;',
-'  z-index:7;transition:opacity .45s,transform .6s;',
+'  pointer-events:none;',
+'  transform:translateZ(3px);transition:opacity .35s,transform .6s;',
 '  filter:drop-shadow(0 3px 5px rgba(60,20,10,.45))}',
 '.env-seal .seal{display:block;width:100%;height:100%}',
-'.env-open{position:absolute;inset:0;z-index:8;border:0;background:none;cursor:pointer;',
+'.env-open{position:absolute;inset:0;z-index:9;transform:translateZ(8px);border:0;background:none;',
+'  cursor:pointer;',
 '  border-radius:4px;font:inherit;color:transparent}',
 '.env-open:focus-visible{outline:2px solid #ffd9a0;outline-offset:5px}',
 '.env-hint{position:absolute;left:0;right:0;bottom:-32px;margin:0;text-align:center;color:#d9e4e6;',
@@ -963,40 +989,49 @@ window.INVITATION = (function () {
 'body[data-envelope="quiet"] .env-address .who{color:#123a4d}',
 
 
-/* ---------- the two things inside it ---------- */
-'.chooser{position:absolute;left:5.5%;right:5.5%;top:0;z-index:2;display:flex;gap:14px;',
-'  align-items:flex-start;justify-content:center}',
-'.slip{flex:1 1 0;min-width:0;max-width:250px;border:0;padding:0;background:none;font:inherit;',
-'  color:var(--ink);cursor:pointer;transform:translateY(34px);opacity:0;',
-'  transition:transform .75s cubic-bezier(.2,.7,.2,1),opacity .4s;filter:drop-shadow(0 -6px 14px rgba(0,0,0,.35))}',
-'.slip__inner{display:block;border:1px solid var(--line);border-bottom:0;border-radius:4px 4px 0 0;',
-'  background:var(--sheen),var(--paper);padding:11px 15px 70px;text-align:left;',
+/* ---------- what is inside it ---------- */
+'.chooser{position:absolute;left:0;right:0;top:0;height:0;z-index:2}',
+'.slip{position:absolute;top:0;border:0;padding:0;background:none;font:inherit;color:var(--ink);',
+'  cursor:pointer;opacity:0;transform-origin:50% 100%;',
+'  transition:transform .9s cubic-bezier(.2,.72,.2,1),opacity .45s;',
+'  filter:drop-shadow(0 -7px 16px rgba(0,0,0,.34))}',
+'.slip__inner{display:block;border:1px solid var(--line);border-bottom:0;border-radius:3px 3px 0 0;',
+'  background:var(--sheen),var(--paper);padding:12px 16px 74px;text-align:left;',
 '  box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}',
-'.slip__head{display:flex;align-items:center;gap:9px;margin-top:9px}',
-'.slip__mark{display:flex;flex:none;color:var(--blue);line-height:0}',
-'.slip__brand{display:block;font-size:15px;font-weight:700;color:var(--blue);line-height:1.12}',
-'.slip__rule{display:block;height:1px;background:var(--line);margin:11px 0 0}',
 '.slip__caption{display:block;font-family:var(--mono);font-size:9.5px;',
 '  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}',
-'.slip--tickets .slip__inner{background:#f3ead7}',
+
+/* the letter: square in the middle, and it comes up first */
+'.slip--letter{left:11%;right:23%;z-index:1;transform:translateY(44px)}',
+'.slip__head{display:flex;align-items:center;gap:9px;margin-top:10px}',
+'.slip__mark{display:flex;flex:none;color:var(--blue);line-height:0}',
+'.slip__brand{display:block;font-size:15px;font-weight:700;color:var(--blue);line-height:1.12}',
+'.slip__rule{display:block;height:1px;background:var(--line);margin:12px 0 0}',
+'.slip__rule--short{width:46%;margin-top:7px}',
+
+/* the passes: tucked in on the right, angled, only their corner showing */
+'.slip--tickets{right:2%;width:34%;z-index:2;transform:translateY(44px) rotate(-10deg)}',
+'.slip--tickets .slip__inner{background:var(--sheen),#f3ead7;padding:11px 14px 66px;text-align:right}',
 '.tedges{display:block;margin-top:9px}',
-'.tedge{display:flex;align-items:baseline;justify-content:space-between;gap:10px;',
-'  padding:8px 11px;background:var(--paper);border:1px solid var(--line);border-top:0;',
+'.tedge{display:flex;align-items:baseline;justify-content:flex-end;gap:9px;',
+'  padding:6px 10px;background:var(--paper);border:1px solid var(--line);border-top:0;',
 '  border-radius:0 0 3px 3px;margin:0 0 3px;box-shadow:0 2px 4px -3px rgba(0,0,0,.4)}',
-'.tedge--0{margin-top:0}.tedge--1{margin-left:5px;margin-right:5px}.tedge--2{margin-left:10px;margin-right:10px}',
+'.tedge--1{margin-right:6px}.tedge--2{margin-right:12px}',
 '.tedge b{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--blue)}',
-'.tedge i{font-family:var(--mono);font-style:normal;font-size:9px;letter-spacing:.1em;color:var(--ink-2)}',
+'.tedge i{font-family:var(--mono);font-style:normal;font-size:8.5px;letter-spacing:.1em;color:var(--ink-2)}',
 
 /* ---------- stages ---------- */
 'body[data-stage="open"] .env-flap,body[data-stage="letter"] .env-flap,body[data-stage="tickets"] .env-flap{',
-'  transform:rotateX(-171deg);z-index:1;transition:transform 1s cubic-bezier(.6,-.15,.3,1.15),z-index 0s .3s}',
-'body[data-stage="open"] .env-seal,body[data-stage="letter"] .env-seal,body[data-stage="tickets"] .env-seal{opacity:0;transform:scale(.5) rotate(-32deg)}',
-'body[data-stage="open"] .slip{opacity:1;transform:translateY(-92px)}',
-'body[data-stage="open"] .slip--letter{transition-delay:.34s}',
-'body[data-stage="open"] .slip--tickets{transition-delay:.46s}',
-'body[data-stage="open"] .slip:hover,body[data-stage="open"] .slip:focus-visible{transform:translateY(-112px);outline:none}',
+'  transform:translateZ(2px) rotateX(-166deg)}',
+'body[data-stage="open"] .env-seal,body[data-stage="letter"] .env-seal,body[data-stage="tickets"] .env-seal{opacity:0;transform:translateZ(3px) scale(.5) rotate(-32deg)}',
+'body[data-stage="open"] .slip{opacity:1}',
+'body[data-stage="open"] .slip--letter{transform:translateY(-104px) scale(1.03);transition-delay:.46s}',
+'body[data-stage="open"] .slip--tickets{transform:translateY(-74px) rotate(-10deg);transition-delay:.62s}',
+'body[data-stage="open"] .slip--letter:hover,body[data-stage="open"] .slip--letter:focus-visible{',
+'  transform:translateY(-124px) scale(1.045);outline:none}',
+'body[data-stage="open"] .slip--tickets:hover,body[data-stage="open"] .slip--tickets:focus-visible{',
+'  transform:translateY(-96px) rotate(-13deg);outline:none}',
 'body[data-stage="open"] .slip:focus-visible .slip__inner{outline:2px solid var(--blue);outline-offset:2px}',
-'body[data-stage="open"] .slip:active{transform:translateY(-124px)}',
 'body[data-stage="open"] .env-open,body[data-stage="letter"] .env-open,body[data-stage="tickets"] .env-open{display:none}',
 'body:not([data-stage="sealed"]) .env-hint{opacity:0;animation:none}',
 /* the pulled-out slip keeps travelling upward and hands over to the real thing */
@@ -1004,21 +1039,24 @@ window.INVITATION = (function () {
    envelope -- slowly at the start, the way paper drags against paper -- while the
    envelope stays put. Only then does the envelope sink away and the real thing
    take over from the slip. */
-'body[data-pull="letter"] .slip--letter,body[data-pull="tickets"] .slip--tickets{',
-'  transform:translateY(-232px) rotate(.6deg);',
+'body[data-pull="letter"] .slip--letter{transform:translateY(-236px);',
+'  transition:transform .46s cubic-bezier(.55,.06,.3,1)}',
+'body[data-pull="tickets"] .slip--tickets{transform:translateY(-206px) rotate(-4deg);',
 '  transition:transform .46s cubic-bezier(.55,.06,.3,1)}',
 'body[data-pull] .slip{pointer-events:none}',
 'body[data-pull="letter"] .slip--tickets,body[data-pull="tickets"] .slip--letter{',
 '  opacity:.25;transform:translateY(-40px);transition:transform .4s ease,opacity .3s ease}',
-'body[data-stage="letter"] .slip--letter,body[data-stage="tickets"] .slip--tickets{',
-'  transform:translateY(-300px) rotate(1.2deg);opacity:0;',
+'body[data-stage="letter"] .slip--letter{transform:translateY(-310px);opacity:0;',
+'  transition:transform .5s ease-out,opacity .3s ease-out}',
+'body[data-stage="tickets"] .slip--tickets{transform:translateY(-290px) rotate(-2deg);opacity:0;',
 '  transition:transform .5s ease-out,opacity .3s ease-out}',
 'body[data-stage="letter"] .slip--tickets,body[data-stage="tickets"] .slip--letter{opacity:0;transform:translateY(10px)}',
 'body[data-stage="letter"] .slip,body[data-stage="tickets"] .slip{pointer-events:none}',
 /* ...while the envelope sinks away, still clickable to put things back */
 'body[data-stage="letter"] .envelope,body[data-stage="tickets"] .envelope{transform:scale(.26);cursor:pointer}',
 'body[data-stage="letter"] .envelope:hover,body[data-stage="tickets"] .envelope:hover{filter:brightness(1.08)}',
-'.env-back-btn{position:absolute;inset:0;z-index:9;border:0;background:none;cursor:pointer;color:transparent;',
+'.env-back-btn{position:absolute;inset:0;z-index:9;transform:translateZ(8px);border:0;background:none;',
+'  cursor:pointer;color:transparent;',
 '  display:none;font:inherit}',
 'body[data-stage="letter"] .env-back-btn,body[data-stage="tickets"] .env-back-btn{display:block}',
 '.putback{margin:2px 0 0;text-align:center;color:#cfdcde;font-family:var(--mono);font-size:9.5px;',
@@ -1232,12 +1270,14 @@ window.INVITATION = (function () {
 '  .postmark{display:none}',
 '  .slip{gap:10px}',
 '  .slip__inner{padding:9px 11px 54px}',
-'  .slip__caption{font-size:8.5px;letter-spacing:.14em}',
-'  .slip__brand{font-size:13px}',
-'  .slip__head{gap:7px;margin-top:7px}',
+'  .slip__caption{font-size:8px;letter-spacing:.13em}',
+'  .slip__brand{font-size:12px}',
+'  .slip__head{gap:6px;margin-top:7px}',
 '  .tedges{margin-top:7px}',
-'  body[data-stage="open"] .slip{transform:translateY(-88px)}',
-'  body[data-stage="open"] .slip:hover,body[data-stage="open"] .slip:focus-visible{transform:translateY(-98px)}',
+'  .slip--letter{left:6%;right:26%}',
+'  .slip--tickets{right:1%;width:36%}',
+'  body[data-stage="open"] .slip--letter{transform:translateY(-86px) scale(1.02)}',
+'  body[data-stage="open"] .slip--tickets{transform:translateY(-62px) rotate(-10deg)}',
 '}',
 
 /* ---------- reduced motion ---------- */
@@ -1451,7 +1491,7 @@ window.INVITATION = (function () {
       '<span class="env-stamp">' + I.stampSvg('28 · 12 · 2026', opts.stampArt) + '</span>' +
       '<span class="env-postmark">' + I.postmarkSvg() + '</span>' +
     '</div>' +
-    I.flapSvg() +
+    '<div class="env-flap">' + I.flapSvg('out') + I.flapSvg('in') + '</div>' +
     '<div class="env-seal">' + I.waxSealSvg(I.COUPLE.initials) + '</div>' +
     '<button type="button" class="env-open" data-stage-to="open">' + esc(t.envelopeOpenLabel) + '</button>' +
     '<button type="button" class="env-back-btn" data-stage-to="open">' + esc(t.backToEnvelope) + '</button>' +
