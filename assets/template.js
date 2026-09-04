@@ -357,8 +357,11 @@
 '.tedge i{font-family:var(--mono);font-style:normal;font-size:8.5px;letter-spacing:.1em;color:var(--ink-2)}',
 
 /* ---------- stages ---------- */
+/* It turns TOWARDS you and over the top. Rotated the other way it sinks behind
+   the envelope front within a few degrees and all you see is a sliver -- which
+   is why it looked like it never turned at all. */
 'body[data-stage="open"] .env-flap,body[data-stage="letter"] .env-flap,body[data-stage="tickets"] .env-flap{',
-'  transform:translateZ(2px) rotateX(-166deg)}',
+'  transform:translateZ(2px) rotateX(166deg)}',
 'body[data-stage="open"] .env-seal,body[data-stage="letter"] .env-seal,body[data-stage="tickets"] .env-seal{opacity:0;transform:translateZ(3px) scale(.5) rotate(-32deg)}',
 'body[data-stage="open"] .slip{opacity:1}',
 'body[data-stage="open"] .slip--letter{transform:translateY(-104px) scale(1.03);transition-delay:.46s}',
