@@ -67,6 +67,10 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
 
 ## Notes on the invitation
 
+- **Two envelopes.** `ENVELOPE` at the top of [`assets/invitation.js`](assets/invitation.js) is
+  `'quiet'`: plain ivory with a hairline plate rule, a drawn flap and a red wax seal with the
+  monogram pressed into it. Set it to `'airmail'` for the striped par avion border and its
+  little blue label instead. Everything else is identical.
 - **Interaction is physical, not chrome.** There is no navigation bar. Click the envelope to
   break the seal, then pull out the letter or the stack of passes by clicking the paper itself.
   Click the shrunken envelope at the top to put things back; `Esc` does the same, and the paper

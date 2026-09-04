@@ -232,6 +232,9 @@
 /* the address face */
 '.env-front{position:absolute;inset:0;z-index:3;border-radius:4px;background:var(--paper);',
 '  box-shadow:0 6px 14px -12px rgba(60,44,20,.75) inset,0 -1px 0 rgba(120,100,64,.22) inset}',
+/* lighter grain here than on the letter, so the face keeps the warmth of the
+   drawn flap instead of drifting grey next to it */
+'.env-front::after{opacity:.2}',
 /* the airmail band: fine, and at the edge where it belongs */
 '.env-front::before{content:"";position:absolute;inset:0;border-radius:4px;padding:6px;',
 '  background:repeating-linear-gradient(115deg,var(--red) 0 7px,transparent 7px 15px,',
@@ -281,12 +284,13 @@
 '@keyframes breathe{0%,100%{opacity:.32}50%{opacity:.85}}',
 
 /* the quieter envelope: no stripes, a hairline rule, teal wax */
-'body[data-envelope="quiet"] .env-front{background:#f8f2e5}',
+/* the quieter envelope: no stripes, just a hairline plate rule */
+'body[data-envelope="quiet"] .env-front{background:#faf3e3}',
 'body[data-envelope="quiet"] .env-front::before{background:none;padding:0;',
 '  border:1px solid rgba(120,100,64,.4);inset:9px;border-radius:2px;opacity:1;',
 '  -webkit-mask:none;mask:none}',
 'body[data-envelope="quiet"] .paravion{display:none}',
-'body[data-envelope="quiet"] .env-address{top:57%}',
+'body[data-envelope="quiet"] .env-address{top:60%}',
 'body[data-envelope="quiet"] .env-address .who{color:#123a4d}',
 
 
@@ -532,9 +536,11 @@
 /* the envelope has little room, so the stamp moves up out of the address's way
    and the cancellation mark steps aside altogether */
 '  .paravion{display:none}',
-'  .env-address{top:52%;right:9%;max-width:none}',
 '  .env-postmark{display:none}',
-'  body[data-envelope="quiet"] .env-address{top:52%}',
+'  .env-address{top:50%;right:9%;max-width:none}',
+'  .env-address .who{font-size:17px;padding-bottom:6px}',
+'  .env-seal{width:44px;height:44px;margin:-22px 0 0 -22px}',
+'  body[data-envelope="quiet"] .env-address{top:50%}',
 '  .env-address .who{font-size:19px}',
 '  .env-stamp{transform:rotate(3.2deg) scale(.46);transform-origin:100% 0;right:5%;top:25%}',
 '  .postmark{display:none}',
@@ -756,7 +762,7 @@
       '<span class="env-postmark">' + I.postmarkSvg() + '</span>' +
     '</div>' +
     I.flapSvg() +
-    '<div class="env-seal">' + I.waxSealSvg(I.COUPLE.initials, I.WAX[envelope]) + '</div>' +
+    '<div class="env-seal">' + I.waxSealSvg(I.COUPLE.initials) + '</div>' +
     '<button type="button" class="env-open" data-stage-to="open">' + esc(t.envelopeOpenLabel) + '</button>' +
     '<button type="button" class="env-back-btn" data-stage-to="open">' + esc(t.backToEnvelope) + '</button>' +
     '<p class="env-hint">' + esc(t.envelopeHint) + '</p>' +

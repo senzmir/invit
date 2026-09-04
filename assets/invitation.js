@@ -27,16 +27,10 @@ window.INVITATION = (function () {
     initials: 'F & V'
   };
 
-  /* Which envelope the invitations go out in: 'airmail' has the striped par
-     avion border and a red wax seal; 'quiet' is plain ivory with a hairline
-     rule and teal wax. Everything else about the piece is identical. */
-  var ENVELOPE = 'airmail';
-
-  var WAX = {
-    airmail: null,
-    quiet: { light: '#2d7f7a', mid: '#175653', dark: '#0c3634',
-      deboss: 'rgba(4,32,30,.7)', emboss: 'rgba(198,238,232,.7)', edge: 'rgba(4,32,30,.45)' }
-  };
+  /* Which envelope the invitations go out in: 'quiet' is plain ivory with a
+     hairline rule; 'airmail' adds the striped par avion border and its little
+     blue label. Both are sealed with the same red wax. */
+  var ENVELOPE = 'quiet';
 
   var FLIGHT = 'I DO';
   var CLASS = 'First';
@@ -404,8 +398,8 @@ window.INVITATION = (function () {
       '</svg>';
   }
 
-  /* Sealing wax: an irregular disc with the monogram pressed into it. The old
-     one was a flat CSS circle, which read as a button. */
+  /* Sealing wax: an irregular disc with the monogram pressed into it. Pass a
+     palette to seal in a different colour. */
   function waxSealSvg(initials, palette) {
     var pts = [], i, n = 22, seed = 7;
     for (i = 0; i < n; i++) {
@@ -453,7 +447,6 @@ window.INVITATION = (function () {
     COUPLE: COUPLE,
     FLIGHT: FLIGHT,
     ENVELOPE: ENVELOPE,
-    WAX: WAX,
     CLASS: CLASS,
     LEGS: LEGS,
     COPY: COPY,
