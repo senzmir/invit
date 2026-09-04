@@ -32,9 +32,9 @@
   /* Small per-pass irregularities. Real tickets never land dead square, and
      three identical rectangles read as a table rather than as paper. */
   var TILTS = [
-    { from: '-2.4deg', rest: '-0.32deg' },
-    { from: '1.9deg', rest: '0.26deg' },
-    { from: '-1.4deg', rest: '-0.18deg' }
+    { from: '-3.2deg', rest: '-0.85deg' },
+    { from: '2.6deg', rest: '0.7deg' },
+    { from: '-2deg', rest: '-0.45deg' }
   ];
 
   function pass(leg, t, names, index) {
@@ -204,15 +204,29 @@
     return fontCss + '\n' + [
 '*,*::before,*::after{box-sizing:border-box}',
 'html{-webkit-text-size-adjust:100%}',
-'body{margin:0;padding:clamp(124px,16vh,170px) 16px 72px;min-height:100vh;',
+'body{margin:0;padding:clamp(124px,16vh,170px) 16px 96px;min-height:100vh;',
 '  font-family:"Cormorant Garamond",Garamond,"Hoefler Text","Times New Roman",serif;',
-'  color:#201c17;background:#0d2f3a;',
-'  background-image:radial-gradient(1100px 700px at 50% -12%,#1b5a68 0%,#103743 52%,#0a222b 100%);',
-'  display:flex;flex-direction:column;align-items:center}',
+'  color:#201c17;background:#0a1f27;',
+'  display:flex;flex-direction:column;align-items:center;position:relative}',
+/* The surface everything is lying on: a pool of light overhead, the corners
+   falling away, and a weave over the whole thing so it reads as a table rather
+   than a page. */
+'body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;',
+'  background:radial-gradient(1000px 620px at 50% -8%,#20616e 0%,#12414e 46%,#0a2530 78%,#071a22 100%)}',
+'body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;',
+'  background-image:var(--grain);background-size:230px 230px;opacity:.3;mix-blend-mode:overlay}',
 ':root{--paper:#f7f1e3;--paper-2:#efe6d3;--ink:#201c17;--ink-2:#6d6153;',
 '  --line:#cbbca1;--blue:#123a4d;--red:#a83f2a;--gold:#b3893f;',
 '  --mono:"Courier Prime","Courier New",monospace;',
-'  --grain:' + I.paperGrain('.82', 4) + '}',
+'  --grain:' + I.paperGrain('.82', 4) + ';',
+/* Paper is not a flat fill. Light falls across a sheet, the cut edge catches it,
+   and the far edge curves away -- these three do most of the work. */
+'  --sheen:linear-gradient(163deg,rgba(255,255,255,.62),rgba(255,255,255,.14) 30%,rgba(255,255,255,0) 58%);',
+'  --curve:radial-gradient(118% 86% at 50% 106%,rgba(112,88,48,.17),rgba(112,88,48,0) 56%);',
+'  --cut-edge:0 0 0 1px rgba(120,100,64,.14),inset 0 1px 0 rgba(255,255,255,.62),',
+'    inset 0 -1px 0 rgba(120,100,64,.18);',
+'  --lift:0 2px 3px -1px rgba(28,18,6,.42),0 15px 20px -11px rgba(20,12,4,.46),',
+'    0 46px 66px -34px rgba(8,5,2,.62)}',
 
 /* Every sheet in the piece carries grain: it is the difference between a cream
    rectangle and a piece of paper. */
@@ -301,7 +315,8 @@
 '  color:var(--ink);cursor:pointer;transform:translateY(34px);opacity:0;',
 '  transition:transform .75s cubic-bezier(.2,.7,.2,1),opacity .4s;filter:drop-shadow(0 -6px 14px rgba(0,0,0,.35))}',
 '.slip__inner{display:block;border:1px solid var(--line);border-bottom:0;border-radius:4px 4px 0 0;',
-'  background:var(--paper);padding:11px 15px 70px;text-align:left}',
+'  background:var(--sheen),var(--paper);padding:11px 15px 70px;text-align:left;',
+'  box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}',
 '.slip__head{display:flex;align-items:center;gap:9px;margin-top:9px}',
 '.slip__mark{display:flex;flex:none;color:var(--blue);line-height:0}',
 '.slip__brand{display:block;font-size:15px;font-weight:700;color:var(--blue);line-height:1.12}',
@@ -393,11 +408,16 @@
 '.fold.is-open .fold__panel--bottom::after{opacity:0}',
 /* paper remembers its crease */
 '.letter{--crease:0}',
-'.letter__crease{position:absolute;left:0;right:0;top:50%;height:3px;pointer-events:none;z-index:2;',
-'  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(120,98,60,.16) 55%,rgba(255,255,255,.3));',
-'  opacity:.75}',
+'.letter__crease{position:absolute;left:0;right:0;top:50%;height:16px;margin-top:-9px;',
+'  pointer-events:none;z-index:2;background:linear-gradient(180deg,',
+'    rgba(112,88,48,0),rgba(112,88,48,.11) 46%,rgba(112,88,48,.17) 53%,',
+'    rgba(255,255,255,.55) 60%,rgba(255,255,255,0) 78%)}',
 
 /* ---------- the passes are dealt out ---------- */
+/* dropped, not listed: they overlap a little and sit at their own angles */
+'.panel--tickets .pass:nth-of-type(2){margin-left:22px;margin-right:-6px}',
+'.panel--tickets .pass:nth-of-type(3){margin-left:-10px;margin-right:14px;margin-top:-26px}',
+'.panel--tickets .pass:nth-of-type(4){margin-left:14px;margin-right:-2px;margin-top:-22px}',
 '.panel--tickets .pass{animation:deal .72s cubic-bezier(.24,.86,.3,1) both;',
 '  animation-delay:var(--deal-delay,0s)}',
 '@keyframes deal{',
@@ -413,35 +433,41 @@
 '@keyframes fadein{from{opacity:0}to{opacity:1}}',
 
 /* ---------- letter ---------- */
-'.letter{position:relative;background:var(--paper);border-radius:2px;padding:clamp(26px,5vw,56px);',
-'  box-shadow:0 1px 1px rgba(0,0,0,.3),0 34px 54px -26px rgba(0,0,0,.62);',
+/* the sheet underneath, showing a sliver of its edge */
+'.panel--letter{position:relative}',
+'.letter__behind{position:absolute;left:11px;right:-11px;top:9px;bottom:-9px;z-index:0;',
+'  border-radius:1px;background:#efe6d3;transform:rotate(.5deg);transform-origin:50% 0;',
+'  box-shadow:0 2px 3px -1px rgba(28,18,6,.4),0 30px 44px -26px rgba(8,5,2,.55)}',
+'.letter{position:relative;z-index:1;border-radius:1px;padding:clamp(24px,4.4vw,50px);',
+'  background:var(--sheen),var(--curve),var(--paper);',
+'  box-shadow:var(--cut-edge),var(--lift);',
 '  line-height:1.6;font-size:clamp(17px,2.1vw,19px)}',
 '.letter__head{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--blue);text-align:center}',
 '.letter__brand{font-size:clamp(23px,3.6vw,30px);font-weight:700;letter-spacing:.02em}',
 '.letter__strap{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2)}',
-'.letter__ref{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:22px 0 26px;',
+'.letter__ref{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 21px;',
 '  padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);',
 '  font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}',
-'.letter p{margin:0 0 16px}',
+'.letter p{margin:0 0 13px}',
 '.letter__greeting{font-size:1.18em;color:var(--blue)}',
-'.letter__itin{margin:30px 0 6px}',
+'.letter__itin{margin:24px 0 4px}',
 '.letter__itin h3,.letter__note h3{margin:0 0 12px;font-family:var(--mono);font-size:11px;',
 '  letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2);font-weight:400}',
 '.itin{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}',
 '.itin__row{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:baseline;',
-'  padding:12px 0;border-bottom:1px solid var(--line)}',
+'  padding:9px 0;border-bottom:1px solid var(--line)}',
 '.itin__code{font-family:var(--mono);font-size:15px;letter-spacing:.1em;color:var(--red)}',
 '.itin__what b{display:block;font-weight:600;color:var(--blue)}',
 '.itin__what em{font-style:normal;font-size:.88em;color:var(--ink-2)}',
 '.itin__when{font-family:var(--mono);font-size:12px;color:var(--ink-2);text-align:right}',
-'.letter__note{margin:30px 0;padding:22px 24px;background:#fbf6ea;border-left:2px solid var(--gold)}',
+'.letter__note{margin:24px 0;padding:18px 22px;background:#fbf6ea;border-left:2px solid var(--gold)}',
 '.letter__note p{font-style:italic;font-size:1.1em;margin:0 0 10px;color:#3a3128}',
 '.letter__note p:last-child{margin-bottom:0}',
-'.letter__sign{margin-top:34px}',
+'.letter__sign{margin-top:26px}',
 '.signoff{margin:0 0 4px!important;color:var(--ink-2)}',
 '.couple{margin:0!important;font-size:1.5em;font-weight:600;color:var(--blue)}',
 '.couple--full{font-size:.72em;font-weight:400;color:var(--ink-2);margin-top:6px!important}',
-'.letter__small{margin-top:32px!important;padding-top:14px;border-top:1px solid var(--line);',
+'.letter__small{margin-top:24px!important;padding-top:12px;border-top:1px solid var(--line);',
 '  font-family:var(--mono);font-size:10.5px;line-height:1.7;color:var(--ink-2)}',
 
 /* ---------- tickets ---------- */
@@ -454,8 +480,11 @@
 '.tearoff:focus-visible{outline:2px solid #ffd9a0;outline-offset:3px}',
 /* --stub is both the stub's width and where the tear line falls, so the punched
    notches at top and bottom line up with the perforation between them. */
-'.pass{--stub:186px;display:flex;background:var(--paper);border-radius:4px;margin:0 0 24px;',
-'  filter:drop-shadow(0 2px 1px rgba(0,0,0,.28)) drop-shadow(0 26px 34px rgba(0,0,0,.4));',
+'.pass{--stub:186px;display:flex;border-radius:3px;margin:0 0 24px;',
+'  background:var(--sheen),var(--curve),var(--paper);',
+'  box-shadow:inset 0 1px 0 rgba(255,255,255,.62),inset 0 -1px 0 rgba(120,100,64,.2);',
+'  filter:drop-shadow(0 1px 0 rgba(28,18,6,.34)) drop-shadow(0 3px 3px rgba(28,18,6,.3))',
+'    drop-shadow(0 27px 34px rgba(10,6,2,.46));',
 '  transition:transform .35s cubic-bezier(.2,.8,.3,1),filter .35s;',
 '  -webkit-mask-image:radial-gradient(circle 9px at right var(--stub) top,transparent 97%,#000),',
 '    radial-gradient(circle 9px at right var(--stub) bottom,transparent 97%,#000);',
@@ -465,7 +494,8 @@
 '  mask-size:100% 50.5%;mask-position:top,bottom;mask-repeat:no-repeat}',
 '.pass:hover,.pass:focus-visible{outline:none;',
 '  transform:translateY(-5px) rotate(var(--rest-tilt,0deg));',
-'  filter:drop-shadow(0 3px 2px rgba(0,0,0,.26)) drop-shadow(0 38px 44px rgba(0,0,0,.46))}',
+'  filter:drop-shadow(0 2px 1px rgba(28,18,6,.3)) drop-shadow(0 6px 6px rgba(28,18,6,.26))',
+'    drop-shadow(0 40px 46px rgba(10,6,2,.5))}',
 '.pass__main{flex:1 1 auto;padding:clamp(18px,3vw,26px);min-width:0}',
 '.pass__brand{display:flex;align-items:center;gap:11px;color:var(--blue);padding-bottom:12px;border-bottom:1px solid var(--line)}',
 '.pass__mark{display:flex;flex:none}',
@@ -498,7 +528,8 @@
 '.pass__follow{margin-top:8px!important;font-family:var(--mono);font-size:10px;',
 '  letter-spacing:.2em;text-transform:uppercase;color:var(--red)}',
 '.pass__stub{position:relative;flex:0 0 var(--stub);padding:clamp(16px,2.4vw,20px);',
-'  background:#f1e8d5;display:flex;flex-direction:column;gap:11px}',
+'  background:linear-gradient(163deg,rgba(255,255,255,.4),rgba(255,255,255,0) 44%),#f1e8d5;',
+'  display:flex;flex-direction:column;gap:11px}',
 /* the perforation: punched dots, not a dashed rule */
 '.pass__stub::before{content:"";position:absolute;left:-5px;top:10px;bottom:10px;width:10px;z-index:2;',
 '  background-image:radial-gradient(circle at 50% 5px,rgba(96,80,52,.34) 0 2.1px,transparent 2.4px);',
@@ -563,11 +594,15 @@
 /* ---------- print: the passes, and nothing else ---------- */
 '@media print{',
 '  body{background:#fff!important;background-image:none!important;padding:0;display:block}',
-'  .env-wrap,.putback,.pagefoot,.tearline,.tickets__intro,.panel--letter{display:none!important}',
+'  .env-wrap,.putback,.pagefoot,.tearline,.tickets__intro,.panel--letter,.letter__behind{display:none!important}',
 '  .panel--tickets,.panel--tickets[hidden]{display:block!important;width:100%;margin:0;animation:none}',
+/* on paper they lie square and separate again: the deal animation sets a
+   transform, and an animation beats a plain declaration, so this has to shout */
+'  .panel--tickets .pass,.panel--tickets .pass:nth-of-type(n){',
+'    animation:none!important;transform:none!important;margin:0 0 8mm!important}',
 '  .pass{break-inside:avoid;page-break-inside:avoid;box-shadow:none;filter:none;',
 '    -webkit-mask-image:none;mask-image:none;border:1px solid #b9a888;',
-'    margin:0 0 8mm;border-radius:0;animation:none;transform:none}',
+'    border-radius:0;background:#f7f1e3}',
 '  .pass:hover{transform:none}',
 '  .paper::after{display:none}',
 '  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}',
@@ -770,7 +805,10 @@
 '</div>\n' +
 '<p class="putback">' + esc(t.backToEnvelope) + '</p>\n' +
 
-'<section class="panel panel--letter" id="panel-letter" hidden>' + letter(t, names, note) + '</section>\n' +
+'<section class="panel panel--letter" id="panel-letter" hidden>' +
+  '<span class="letter__behind" aria-hidden="true"></span>' +
+  letter(t, names, note) +
+'</section>\n' +
 '<section class="panel panel--tickets" id="panel-tickets" hidden>' +
   '<p class="tearline"><button type="button" class="tearoff" id="btn-print">' + esc(t.printTickets) + '</button></p>' +
   passes +

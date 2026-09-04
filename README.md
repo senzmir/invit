@@ -94,9 +94,13 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
   swings down, the shadow along the crease lifts, and then the scaffold is thrown away and the
   actual letter takes its place — so print, text selection and screen readers only ever see one
   letter. The faint crease line across the middle stays, the way paper remembers a fold.
-- **The passes are dealt out** of the envelope one after another, each landing at a slightly
-  different angle. They have punched perforations and notched corners along the tear line, and
-  every sheet in the piece carries a fine paper grain.
+- **It is meant to read as paper on a table, not as cards on a page.** Everything lies on a
+  lit surface with the corners falling away; light falls across each sheet, the cut edge
+  catches it, the far edge curves off, and every sheet carries a fine grain. The letter has
+  a second page showing a sliver of its edge behind the first.
+- **The passes are dealt out** of the envelope one after another, landing overlapped and each
+  at its own angle, the way tickets fall. They have punched perforations and notched corners
+  along the tear line. On paper they straighten up and separate again.
 - **Print** gives you the three passes on A4 and nothing else — no envelope, no letter, no
   buttons, no grain.
 - Works with JavaScript off (the letter and passes are simply laid out down the page), respects
