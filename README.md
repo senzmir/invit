@@ -13,6 +13,8 @@ Three legs, one marriage:
 | 2 | `AMS → WDH` Windhoek, Namibia | September 2027 | The traditional ceremony |
 | 3 | `WDH → ITA` Italy | To be announced | The dinner |
 
+Every leg flies **1D0**.
+
 ## Minting an invitation
 
 Open **`index.html`** in any browser — double-click it, no server and no install needed.
@@ -57,9 +59,12 @@ just below, in both languages.
 | `assets/invitation.js` | **the wedding facts**, both languages of copy, the drawn marks |
 | `assets/template.js` | the invitation document itself: markup, styles, the envelope |
 | `assets/fonts.js` | Cormorant Garamond + Courier Prime, base64'd (generated) |
+| `assets/stamp/couple.jpg` | **the picture in the stamp** — swap this for the drawing |
+| `assets/stamp-art.js` | that picture, base64'd (generated) |
 | `assets/fonts/` | the source `.woff2` files and their SIL Open Font Licences |
 | `example-invitation.html` | a minted sample, for looking at and test-printing |
 | `tools/build-fonts.py` | regenerates `assets/fonts.js` from `assets/fonts/` |
+| `tools/build-stamp-art.py` | regenerates `assets/stamp-art.js` from `assets/stamp/` |
 | `tools/build-example.js` | regenerates `example-invitation.html` |
 
 The invitation is deliberately plain JavaScript with no build step and no dependencies: open a
@@ -67,6 +72,10 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
 
 ## Notes on the invitation
 
+- **The stamp holds a picture of you two**, with the date on the band underneath. It is a
+  photograph for now. When the artist delivers a drawing, save it as
+  `assets/stamp/couple.jpg` (or `.png`) and run `python3 tools/build-stamp-art.py` — portrait,
+  roughly 4:5, a few hundred pixels wide is plenty. Nothing else changes.
 - **Two envelopes.** `ENVELOPE` at the top of [`assets/invitation.js`](assets/invitation.js) is
   `'quiet'`: plain ivory with a hairline plate rule, a drawn flap and a red wax seal with the
   monogram pressed into it. Set it to `'airmail'` for the striped par avion border and its

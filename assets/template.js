@@ -142,7 +142,7 @@
 
       '<div class="letter__ref">' +
         '<span>' + esc(t.bookingTitle) + '</span>' +
-        '<span>' + esc(t.refLabel) + ' · IDO-28122026</span>' +
+        '<span>' + esc(t.refLabel) + ' · ' + esc(I.FLIGHT) + '-28122026</span>' +
       '</div>' +
 
       '<p class="letter__greeting">' + esc(t.greeting(names.first)) + '</p>' +
@@ -263,7 +263,7 @@
 /* stamp, and the cancellation landing across it */
 '.env-stamp{position:absolute;right:7.5%;top:46%;transform:rotate(2.6deg);',
 '  filter:drop-shadow(0 1px 2px rgba(60,44,20,.3))}',
-'.env-postmark{position:absolute;right:5%;top:46%;width:36%;pointer-events:none;',
+'.env-postmark{position:absolute;right:4%;top:41%;width:36%;pointer-events:none;',
 '  transform:rotate(-8deg);transform-origin:78% 40%}',
 '.postmark{display:block;width:100%;height:auto}',
 
@@ -758,7 +758,7 @@
         '<span class="who">' + esc(names.full || t.envelopePassenger) + '</span>' +
         '<span class="via">' + esc(t.brand) + ' &nbsp;·&nbsp; ' + esc(t.lFlight) + ' ' + esc(I.FLIGHT) + '</span>' +
       '</div>' +
-      '<span class="env-stamp">' + I.stampSvg(I.COUPLE.initials, '28.12.2026') + '</span>' +
+      '<span class="env-stamp">' + I.stampSvg('28 · 12 · 2026', opts.stampArt) + '</span>' +
       '<span class="env-postmark">' + I.postmarkSvg() + '</span>' +
     '</div>' +
     I.flapSvg() +

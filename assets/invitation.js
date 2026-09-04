@@ -32,7 +32,7 @@ window.INVITATION = (function () {
      blue label. Both are sealed with the same red wax. */
   var ENVELOPE = 'quiet';
 
-  var FLIGHT = 'I DO';
+  var FLIGHT = '1D0';
   var CLASS = 'First';
 
   var LEGS = [
@@ -303,11 +303,12 @@ window.INVITATION = (function () {
     return '<div class="barcode" aria-hidden="true">' + bars.join('') + '</div>';
   }
 
-  /* Postage stamp: the airline's own mark, engraved. Drawn rather than
-     photographed so it stays sharp in print, with the perforations punched as
-     paper-coloured circles over its edge. */
-  function stampSvg(initials, dateLine) {
-    var w = 78, h = 94, step = 11, holes = '', x, y;
+  /* Postage stamp: the two of them in the picture panel, the date on the band
+     underneath, perforations punched as paper-coloured circles over the edge.
+     The picture comes in as a data URL from assets/stamp-art.js -- swap the file
+     in assets/stamp/ and rebuild to put a drawing there instead. */
+  function stampSvg(dateLine, art) {
+    var w = 88, h = 108, step = 11, holes = '', x, y;
     for (x = step / 2; x < w; x += step) {
       holes += '<circle cx="' + x.toFixed(1) + '" cy="0" r="2.9"/>' +
                '<circle cx="' + x.toFixed(1) + '" cy="' + h + '" r="2.9"/>';
@@ -316,27 +317,34 @@ window.INVITATION = (function () {
       holes += '<circle cx="0" cy="' + y.toFixed(1) + '" r="2.9"/>' +
                '<circle cx="' + w + '" cy="' + y.toFixed(1) + '" r="2.9"/>';
     }
-    return '' +
-      '<svg class="stamp" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" role="img" aria-hidden="true">' +
-        '<rect width="' + w + '" height="' + h + '" fill="#f6eeda"/>' +
-        '<rect x="5" y="5" width="' + (w - 10) + '" height="' + (h - 10) + '" fill="none" ' +
-          'stroke="#a83f2a" stroke-width=".9"/>' +
-        /* engraved sky: fine horizontal rules behind the mark */
-        '<g stroke="#123a4d" stroke-width=".45" opacity=".26">' +
-          '<path d="M9 22 H69 M9 27 H69 M9 32 H69 M9 37 H69 M9 42 H69"/>' +
-        '</g>' +
-        /* the airline mark */
-        '<g transform="translate(39 36) scale(.44) translate(-32 -32)" fill="#123a4d">' +
-          '<circle cx="32" cy="32" r="30" fill="#f6eeda" stroke="#123a4d" stroke-width="1.8"/>' +
+
+    var INK = '#123a4d', PAPER = '#f6eeda';
+
+    /* the picture panel, or the airline's mark if no artwork is loaded */
+    var panel = art
+      ? '<image href="' + esc(art) + '" xlink:href="' + esc(art) + '" ' +
+          'x="7" y="7" width="74" height="76" preserveAspectRatio="xMidYMin slice" ' +
+          'clip-path="url(#bfa-stamp-clip)"/>'
+      : '<g transform="translate(44 45) scale(.62) translate(-32 -32)" fill="' + INK + '">' +
+          '<circle cx="32" cy="32" r="30" fill="none" stroke="' + INK + '" stroke-width="1.8"/>' +
           '<path d="M32 11 c2.6 5 3 14 3 21 v9 c0 4 -1 8 -3 11 c-2 -3 -3 -7 -3 -11 v-9 c0 -7 .4 -16 3 -21 z"/>' +
           '<path d="M32 27 L11 39 v3.4 L32 35.6 L53 42.4 V39 z"/>' +
           '<path d="M32 45 L22.5 50.5 v2.2 L32 49.4 l9.5 3.3 v-2.2 z"/>' +
-        '</g>' +
-        '<text x="' + (w / 2) + '" y="66" text-anchor="middle" ' +
-          'font-family="Cormorant Garamond, Garamond, serif" font-size="19" font-weight="600" ' +
-          'fill="#123a4d">' + esc(initials) + '</text>' +
-        '<text x="' + (w / 2) + '" y="82" text-anchor="middle" ' +
-          'font-family="Courier Prime, Courier New, monospace" font-size="7.5" letter-spacing="1" ' +
+        '</g>';
+
+    return '' +
+      '<svg class="stamp" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" ' +
+        'xmlns:xlink="http://www.w3.org/1999/xlink" ' +
+        'role="img" aria-label="' + esc(COUPLE.shortOne + ' and ' + COUPLE.shortTwo) + '">' +
+        '<defs><clipPath id="bfa-stamp-clip"><rect x="7" y="7" width="74" height="76" rx="1"/></clipPath></defs>' +
+        '<rect width="' + w + '" height="' + h + '" fill="' + PAPER + '"/>' +
+        panel +
+        '<rect x="7" y="7" width="74" height="76" rx="1" fill="none" ' +
+          'stroke="rgba(18,58,77,.35)" stroke-width=".7"/>' +
+        '<rect x="5" y="5" width="' + (w - 10) + '" height="' + (h - 10) + '" fill="none" ' +
+          'stroke="#a83f2a" stroke-width=".9"/>' +
+        '<text x="' + (w / 2) + '" y="96.5" text-anchor="middle" ' +
+          'font-family="Courier Prime, Courier New, monospace" font-size="7.2" letter-spacing=".9" ' +
           'fill="#a83f2a">' + esc(dateLine) + '</text>' +
         '<g fill="#f3ecdc">' + holes + '</g>' +
       '</svg>';
