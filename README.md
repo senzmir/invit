@@ -17,7 +17,10 @@ Every leg flies **1D0**.
 
 ## Minting an invitation
 
-Open **`index.html`** in any browser — double-click it, no server and no install needed.
+Open **`minter.html`** in any browser — double-click it, no server and no install needed. It is
+one self-contained file, so it works anywhere, including a machine that has never seen this
+repo. (`index.html` is the same desk but loads its scripts from `assets/`; work on that one and
+run `node tools/build-minter.js` to rebuild `minter.html`.)
 
 1. Type the guest's name. The three printed forms (full on the passes, first name in the
    letter, initial + surname on the stub) fill in automatically; overtype any of them if a
@@ -55,7 +58,8 @@ just below, in both languages.
 
 | | |
 |---|---|
-| `index.html` | the minting desk — form, live preview, download |
+| `minter.html` | **the minting desk, one self-contained file** — this is the one to use |
+| `index.html` | the same desk, loading its scripts from `assets/` — work on this one |
 | `assets/invitation.js` | **the wedding facts**, both languages of copy, the drawn marks |
 | `assets/template.js` | the invitation document itself: markup, styles, the envelope |
 | `assets/fonts.js` | Cormorant Garamond + Courier Prime, base64'd (generated) |
@@ -66,6 +70,7 @@ just below, in both languages.
 | `tools/build-fonts.py` | regenerates `assets/fonts.js` from `assets/fonts/` |
 | `tools/build-stamp-art.py` | regenerates `assets/stamp-art.js` from `assets/stamp/` |
 | `tools/build-example.js` | regenerates `example-invitation.html` |
+| `tools/build-minter.js` | regenerates `minter.html` from `index.html` + `assets/` |
 
 The invitation is deliberately plain JavaScript with no build step and no dependencies: open a
 file, edit it, reload. The only generated file is `assets/fonts.js`.
