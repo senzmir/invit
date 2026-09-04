@@ -63,7 +63,7 @@ just below, in both languages.
 | `assets/invitation.js` | **the wedding facts**, both languages of copy, the drawn marks |
 | `assets/template.js` | the invitation document itself: markup, styles, the envelope |
 | `assets/fonts.js` | Cormorant Garamond + Courier Prime, base64'd (generated) |
-| `assets/stamp/couple.jpg` | **the picture in the stamp** — swap this for the drawing |
+| `assets/stamp/` | drop artwork here to replace the stamp's drawn flowers |
 | `assets/stamp-art.js` | that picture, base64'd (generated) |
 | `assets/fonts/` | the source `.woff2` files and their SIL Open Font Licences |
 | `example-invitation.html` | a minted sample, for looking at and test-printing |
@@ -77,10 +77,12 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
 
 ## Notes on the invitation
 
-- **The stamp holds a picture of you two**, with the date on the band underneath. It is a
-  photograph for now. When the artist delivers a drawing, save it as
-  `assets/stamp/couple.jpg` (or `.png`) and run `python3 tools/build-stamp-art.py` — portrait,
-  roughly 4:5, a few hundred pixels wide is plenty. Nothing else changes.
+- **The stamp is a posy**, drawn in blush and sage with the date on the band underneath, and
+  the same flowers appear as a sprig on the letterhead. To put a picture there instead — a
+  photograph, or a drawing when the artist delivers one — save it as `assets/stamp/couple.jpg`
+  (or `.png`) and run `python3 tools/build-stamp-art.py`; portrait, roughly 4:5, a few hundred
+  pixels wide is plenty. Remove the file and run it again to go back to the flowers.
+  The flower colours are the `BLOOM` block at the top of `assets/invitation.js`.
 - **Two envelopes.** `ENVELOPE` at the top of [`assets/invitation.js`](assets/invitation.js) is
   `'quiet'`: plain ivory with a hairline plate rule, a drawn flap and a red wax seal with the
   monogram pressed into it. Set it to `'airmail'` for the striped par avion border and its

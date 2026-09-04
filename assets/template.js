@@ -138,6 +138,7 @@
         '<span class="letter__mark">' + I.roundelSvg(46) + '</span>' +
         '<span class="letter__brand">' + esc(t.brand) + '</span>' +
         '<span class="letter__strap">' + esc(t.strapline) + '</span>' +
+        '<span class="letter__sprig">' + I.sprigSvg() + '</span>' +
       '</header>' +
 
       '<div class="letter__ref">' +
@@ -212,15 +213,15 @@
 /* headroom for the letter and the passes to rise out of the envelope */
 'body{margin:0;padding:clamp(168px,18vh,196px) 16px 96px;min-height:100vh;',
 '  font-family:"Cormorant Garamond",Garamond,"Hoefler Text","Times New Roman",serif;',
-'  color:#201c17;background:#0a1f27;',
+'  color:#201c17;background:#d8c6b1;',
 '  display:flex;flex-direction:column;align-items:center;position:relative}',
-/* The surface everything is lying on: a pool of light overhead, the corners
-   falling away, and a weave over the whole thing so it reads as a table rather
-   than a page. */
+/* The surface everything is lying on: warm linen under a pool of light, corners
+   falling away. It used to be a near-black teal, which made a cream envelope and
+   a single dark posy read as a condolence card rather than a wedding. */
 'body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;',
-'  background:radial-gradient(1000px 620px at 50% -8%,#20616e 0%,#12414e 46%,#0a2530 78%,#071a22 100%)}',
+'  background:radial-gradient(1100px 700px at 50% -6%,#f0e2cf 0%,#e2d0ba 40%,#cdb69e 74%,#b89c81 100%)}',
 'body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;',
-'  background-image:var(--grain);background-size:230px 230px;opacity:.3;mix-blend-mode:overlay}',
+'  background-image:var(--grain);background-size:230px 230px;opacity:.34;mix-blend-mode:multiply}',
 ':root{--paper:#f7f1e3;--paper-2:#efe6d3;--ink:#201c17;--ink-2:#6d6153;',
 '  --line:#cbbca1;--blue:#123a4d;--red:#a83f2a;--gold:#b3893f;',
 '  --mono:"Courier Prime","Courier New",monospace;',
@@ -231,8 +232,8 @@
 '  --curve:radial-gradient(118% 86% at 50% 106%,rgba(112,88,48,.17),rgba(112,88,48,0) 56%);',
 '  --cut-edge:0 0 0 1px rgba(120,100,64,.14),inset 0 1px 0 rgba(255,255,255,.62),',
 '    inset 0 -1px 0 rgba(120,100,64,.18);',
-'  --lift:0 2px 3px -1px rgba(28,18,6,.42),0 15px 20px -11px rgba(20,12,4,.46),',
-'    0 46px 66px -34px rgba(8,5,2,.62)}',
+'  --lift:0 2px 3px -1px rgba(70,48,24,.3),0 15px 20px -11px rgba(70,48,24,.28),',
+'    0 46px 66px -34px rgba(60,40,20,.4)}',
 
 /* Every sheet in the piece carries grain: it is the difference between a cream
    rectangle and a piece of paper. */
@@ -248,7 +249,7 @@
 '  transform-style:preserve-3d;',
 '  transform-origin:50% 0;transition:transform .85s cubic-bezier(.3,.75,.25,1) .06s,filter .5s}',
 '.env-back{position:absolute;inset:0;border-radius:4px;background:#d9cbaf;pointer-events:none;',
-'  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 30px 64px -30px rgba(0,0,0,.7)}',
+'  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 28px 58px -28px rgba(60,40,20,.5)}',
 
 /* the address face */
 '.env-front{position:absolute;inset:0;z-index:3;border-radius:4px;background:var(--paper);',
@@ -321,11 +322,11 @@
 '.env-open{position:absolute;inset:0;z-index:9;transform:translateZ(8px);border:0;background:none;',
 '  cursor:pointer;',
 '  border-radius:4px;font:inherit;color:transparent}',
-'.env-open:focus-visible{outline:2px solid #ffd9a0;outline-offset:5px}',
-'.env-hint{position:absolute;left:0;right:0;bottom:-32px;margin:0;text-align:center;color:#d9e4e6;',
+'.env-open:focus-visible{outline:2px solid #8a5a34;outline-offset:5px}',
+'.env-hint{position:absolute;left:0;right:0;bottom:-32px;margin:0;text-align:center;color:#6d5744;',
 '  font-family:var(--mono);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;',
 '  animation:breathe 3.4s ease-in-out infinite;transition:opacity .4s}',
-'@keyframes breathe{0%,100%{opacity:.32}50%{opacity:.85}}',
+'@keyframes breathe{0%,100%{opacity:.38}50%{opacity:.9}}',
 
 /* the quieter envelope: no stripes, a hairline rule, teal wax */
 /* the quieter envelope: no stripes, just a hairline plate rule */
@@ -343,7 +344,7 @@
 '.slip{position:absolute;top:0;border:0;padding:0;background:none;font:inherit;color:var(--ink);',
 '  cursor:pointer;opacity:0;transform-origin:50% 100%;',
 '  transition:transform .9s cubic-bezier(.2,.72,.2,1),opacity .45s;',
-'  filter:drop-shadow(0 -7px 16px rgba(0,0,0,.34))}',
+'  filter:drop-shadow(0 -7px 16px rgba(70,48,24,.26))}',
 '.slip__inner{display:block;border:1px solid var(--line);border-bottom:0;border-radius:3px 3px 0 0;',
 '  background:var(--sheen),var(--paper);padding:12px 16px 74px;text-align:left;',
 '  box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}',
@@ -417,9 +418,9 @@
 '  cursor:pointer;color:transparent;',
 '  display:none;font:inherit}',
 'body[data-stage="letter"] .env-back-btn,body[data-stage="tickets"] .env-back-btn{display:block}',
-'.putback{margin:2px 0 0;text-align:center;color:#cfdcde;font-family:var(--mono);font-size:9.5px;',
+'.putback{margin:2px 0 0;text-align:center;color:#6d5744;font-family:var(--mono);font-size:9.5px;',
 '  letter-spacing:.24em;text-transform:uppercase;opacity:0;transition:opacity .5s .5s;pointer-events:none}',
-'body[data-stage="letter"] .putback,body[data-stage="tickets"] .putback{opacity:.45}',
+'body[data-stage="letter"] .putback,body[data-stage="tickets"] .putback{opacity:.55}',
 
 /* ---------- what comes out ---------- */
 '.panel{position:relative;z-index:1;width:min(760px,100%);margin-top:clamp(16px,3vw,30px)}',
@@ -488,7 +489,7 @@
 '.panel--letter{position:relative}',
 '.letter__behind{position:absolute;left:11px;right:-11px;top:9px;bottom:-9px;z-index:0;',
 '  border-radius:1px;background:#efe6d3;transform:rotate(.5deg);transform-origin:50% 0;',
-'  box-shadow:0 2px 3px -1px rgba(28,18,6,.4),0 30px 44px -26px rgba(8,5,2,.55)}',
+'  box-shadow:0 2px 3px -1px rgba(70,48,24,.28),0 30px 44px -26px rgba(60,40,20,.38)}',
 '.letter{position:relative;z-index:1;border-radius:1px;padding:clamp(24px,4.4vw,50px);',
 '  background:var(--sheen),var(--curve),var(--paper);',
 '  box-shadow:var(--cut-edge),var(--lift);',
@@ -496,6 +497,8 @@
 '.letter__head{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--blue);text-align:center}',
 '.letter__brand{font-size:clamp(23px,3.6vw,30px);font-weight:700;letter-spacing:.02em}',
 '.letter__strap{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2)}',
+'.letter__sprig{display:block;margin-top:10px;line-height:0;opacity:.8}',
+'.sprig{display:block;width:132px;height:auto}',
 '.letter__ref{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 21px;',
 '  padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);',
 '  font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}',
@@ -522,20 +525,20 @@
 '  font-family:var(--mono);font-size:10.5px;line-height:1.7;color:var(--ink-2)}',
 
 /* ---------- tickets ---------- */
-'.tearline{display:flex;align-items:center;gap:14px;margin:0 0 18px;color:#cfdcde}',
-'.tearline::before,.tearline::after{content:"";flex:1 1 auto;border-top:1px dashed rgba(207,220,222,.45)}',
+'.tearline{display:flex;align-items:center;gap:14px;margin:0 0 18px;color:#6d5744}',
+'.tearline::before,.tearline::after{content:"";flex:1 1 auto;border-top:1px dashed rgba(109,87,68,.42)}',
 '.tearoff{font:inherit;font-size:13px;font-family:var(--mono);letter-spacing:.18em;text-transform:uppercase;',
-'  cursor:pointer;border:1px dashed rgba(207,220,222,.5);border-radius:2px;padding:7px 15px;',
-'  background:transparent;color:#dfe9ea;transition:background .2s,color .2s,border-color .2s}',
+'  cursor:pointer;border:1px dashed rgba(109,87,68,.5);border-radius:2px;padding:7px 15px;',
+'  background:transparent;color:#5e4b39;transition:background .2s,color .2s,border-color .2s}',
 '.tearoff:hover{background:var(--paper);color:var(--blue);border-color:transparent}',
-'.tearoff:focus-visible{outline:2px solid #ffd9a0;outline-offset:3px}',
+'.tearoff:focus-visible{outline:2px solid #8a5a34;outline-offset:3px}',
 /* --stub is both the stub's width and where the tear line falls, so the punched
    notches at top and bottom line up with the perforation between them. */
 '.pass{--stub:186px;display:flex;border-radius:3px;margin:0 0 24px;',
 '  background:var(--sheen),var(--curve),var(--paper);',
 '  box-shadow:inset 0 1px 0 rgba(255,255,255,.62),inset 0 -1px 0 rgba(120,100,64,.2);',
-'  filter:drop-shadow(0 1px 0 rgba(28,18,6,.34)) drop-shadow(0 3px 3px rgba(28,18,6,.3))',
-'    drop-shadow(0 27px 34px rgba(10,6,2,.46));',
+'  filter:drop-shadow(0 1px 0 rgba(70,48,24,.26)) drop-shadow(0 3px 3px rgba(70,48,24,.22))',
+'    drop-shadow(0 27px 34px rgba(60,40,20,.32));',
 '  transition:transform .35s cubic-bezier(.2,.8,.3,1),filter .35s;',
 '  -webkit-mask-image:radial-gradient(circle 9px at right var(--stub) top,transparent 97%,#000),',
 '    radial-gradient(circle 9px at right var(--stub) bottom,transparent 97%,#000);',
@@ -545,8 +548,8 @@
 '  mask-size:100% 50.5%;mask-position:top,bottom;mask-repeat:no-repeat}',
 '.pass:hover,.pass:focus-visible{outline:none;',
 '  transform:translateY(-5px) rotate(var(--rest-tilt,0deg));',
-'  filter:drop-shadow(0 2px 1px rgba(28,18,6,.3)) drop-shadow(0 6px 6px rgba(28,18,6,.26))',
-'    drop-shadow(0 40px 46px rgba(10,6,2,.5))}',
+'  filter:drop-shadow(0 2px 1px rgba(70,48,24,.24)) drop-shadow(0 6px 6px rgba(70,48,24,.2))',
+'    drop-shadow(0 40px 46px rgba(60,40,20,.36))}',
 '.pass__main{flex:1 1 auto;padding:clamp(18px,3vw,26px);min-width:0}',
 '.pass__brand{display:flex;align-items:center;gap:11px;color:var(--blue);padding-bottom:12px;border-bottom:1px solid var(--line)}',
 '.pass__mark{display:flex;flex:none}',
@@ -598,7 +601,7 @@
 '.barcode i{display:block;height:100%;background:var(--ink)}',
 
 /* ---------- footer ---------- */
-'.pagefoot{margin:58px 0 0;color:#cfdcde;opacity:.45;font-family:var(--mono);font-size:10px;',
+'.pagefoot{margin:58px 0 0;color:#6d5744;opacity:.6;font-family:var(--mono);font-size:10px;',
 '  letter-spacing:.24em;text-transform:uppercase;text-align:center}',
 
 /* ---------- small screens ---------- */

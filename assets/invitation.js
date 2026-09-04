@@ -303,6 +303,90 @@ window.INVITATION = (function () {
     return '<div class="barcode" aria-hidden="true">' + bars.join('') + '</div>';
   }
 
+  /* Flowers. A petal is a teardrop, and a blossom is that teardrop turned around
+     a centre; everything below is built from those two, so the same routine makes
+     the stamp's posy and the letter's sprig. Drawn in colour -- one dark ink and
+     a bouquet reads as a wreath. */
+  var BLOOM = {
+    petal: '#d59a94',
+    petalBack: '#c07f7c',
+    heart: '#dda93f',
+    stem: '#7c8f68',
+    leaf: '#6f855f',
+    filler: '#b9c4a6',
+    ribbon: '#c98f89'
+  };
+
+  function petalPath(cx, cy, r, angle, fill) {
+    var k = (r / 18).toFixed(3);
+    return '<path d="M0 0 C6 -4 6.6 -13 0 -18 C-6.6 -13 -6 -4 0 0 Z" fill="' + fill + '"' +
+      ' transform="translate(' + cx + ' ' + cy + ') rotate(' + angle + ') scale(' + k + ')"/>';
+  }
+
+  function blossom(cx, cy, r, petals, spin) {
+    var out = '', i;
+    /* back petals first, in the deeper tone, so the flower has some depth */
+    for (i = 0; i < petals; i++) {
+      out += petalPath(cx, cy, r, (spin || 0) + (i + 0.5) * (360 / petals), BLOOM.petalBack);
+    }
+    for (i = 0; i < petals; i++) {
+      out += petalPath(cx, cy, r * 0.94, (spin || 0) + i * (360 / petals), BLOOM.petal);
+    }
+    out += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.2).toFixed(2) + '" fill="' + BLOOM.heart + '"/>';
+    return out;
+  }
+
+  function leaf(cx, cy, len, angle) {
+    var k = (len / 16).toFixed(3);
+    return '<path d="M0 0 C5.2 -3 9 -9.5 10 -16 C3.6 -14.4 0.4 -8 0 0 Z" fill="' + BLOOM.leaf + '"' +
+      ' transform="translate(' + cx + ' ' + cy + ') rotate(' + angle + ') scale(' + k + ')"/>';
+  }
+
+  /* A posy: three stems gathered and tied, blossoms at the tips, leaves down the
+     sides, a few sprigs of gypsophila between them. */
+  function posySvg() {
+    return '' +
+      '<g fill="none" stroke="' + BLOOM.stem + '" stroke-width="1.6" stroke-linecap="round">' +
+        '<path d="M50 88 C49 72 49 56 50 37"/>' +
+        '<path d="M50 84 C43 70 34 60 29.5 51"/>' +
+        '<path d="M50 82 C57 69 65.5 60 70 53"/>' +
+        '<path d="M50 79 C46 70 41 65 36.5 62" stroke-width="1"/>' +
+        '<path d="M50 77 C55 68 59 64 63.5 62" stroke-width="1"/>' +
+      '</g>' +
+      leaf(50, 72, 16, -58) + leaf(50, 67, 14.5, 58) +
+      leaf(50, 61, 13, -48) + leaf(50, 56, 12, 50) +
+      '<g fill="' + BLOOM.filler + '">' +
+        '<circle cx="36" cy="59" r="1.6"/><circle cx="32.5" cy="55" r="1.3"/>' +
+        '<circle cx="39" cy="54" r="1.3"/><circle cx="64" cy="60" r="1.6"/>' +
+        '<circle cx="67.5" cy="56" r="1.3"/><circle cx="61" cy="55" r="1.3"/>' +
+      '</g>' +
+      '<g fill="none" stroke="' + BLOOM.ribbon + '" stroke-linecap="round">' +
+        '<path d="M44.5 80.5 C48 83 52 83 55.5 80.5" stroke-width="1.7"/>' +
+        '<path d="M46 82 C42.5 85 41 89 41.5 93" stroke-width="1.3"/>' +
+        '<path d="M54 82 C57.5 85 59 89 58.5 93" stroke-width="1.3"/>' +
+      '</g>' +
+      '<path d="M50 82 C48.6 85 48.6 89 50 95 C51.4 89 51.4 85 50 82 Z" fill="' + BLOOM.stem + '"/>' +
+      blossom(29.5, 46, 12, 6, 12) +
+      blossom(70, 48, 11, 6, -8) +
+      blossom(50, 30, 15.5, 7, 0);
+  }
+
+  /* A single stem, for the letterhead. */
+  function sprigSvg() {
+    return '' +
+      '<svg class="sprig" viewBox="0 0 120 34" width="120" height="34" aria-hidden="true">' +
+        '<g fill="none" stroke="' + BLOOM.stem + '" stroke-width="1.1" stroke-linecap="round">' +
+          '<path d="M12 22 C30 12 46 10 60 10 C74 10 90 12 108 22"/>' +
+        '</g>' +
+        leaf(38, 15, 9, -128) + leaf(82, 15, 9, 128) +
+        leaf(28, 18, 7.5, -140) + leaf(92, 18, 7.5, 140) +
+        '<g fill="' + BLOOM.filler + '">' +
+          '<circle cx="22" cy="19" r="1.3"/><circle cx="98" cy="19" r="1.3"/>' +
+        '</g>' +
+        blossom(60, 12, 8, 6, 0) +
+      '</svg>';
+  }
+
   /* Postage stamp: the two of them in the picture panel, the date on the band
      underneath, perforations punched as paper-coloured circles over the edge.
      The picture comes in as a data URL from assets/stamp-art.js -- swap the file
@@ -320,17 +404,12 @@ window.INVITATION = (function () {
 
     var INK = '#123a4d', PAPER = '#f6eeda';
 
-    /* the picture panel, or the airline's mark if no artwork is loaded */
+    /* the engraved posy -- or a picture, if one is dropped into assets/stamp/ */
     var panel = art
       ? '<image href="' + esc(art) + '" xlink:href="' + esc(art) + '" ' +
           'x="7" y="7" width="74" height="76" preserveAspectRatio="xMidYMin slice" ' +
           'clip-path="url(#bfa-stamp-clip)"/>'
-      : '<g transform="translate(44 45) scale(.62) translate(-32 -32)" fill="' + INK + '">' +
-          '<circle cx="32" cy="32" r="30" fill="none" stroke="' + INK + '" stroke-width="1.8"/>' +
-          '<path d="M32 11 c2.6 5 3 14 3 21 v9 c0 4 -1 8 -3 11 c-2 -3 -3 -7 -3 -11 v-9 c0 -7 .4 -16 3 -21 z"/>' +
-          '<path d="M32 27 L11 39 v3.4 L32 35.6 L53 42.4 V39 z"/>' +
-          '<path d="M32 45 L22.5 50.5 v2.2 L32 49.4 l9.5 3.3 v-2.2 z"/>' +
-        '</g>';
+      : '<g transform="translate(7 9) scale(.74)">' + posySvg() + '</g>';
 
     return '' +
       '<svg class="stamp" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" ' +
@@ -473,6 +552,7 @@ window.INVITATION = (function () {
     barcode: barcode,
     paperGrain: paperGrain,
     stampSvg: stampSvg,
+    sprigSvg: sprigSvg,
     flapSvg: flapSvg,
     waxSealSvg: waxSealSvg,
     roundelSvg: roundelSvg,

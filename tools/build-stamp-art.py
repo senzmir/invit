@@ -33,7 +33,11 @@ def main():
     art = next((p for p in sorted(ART_DIR.iterdir())
                 if p.stem == "couple" and p.suffix.lower() in TYPES), None)
     if art is None:
-        raise SystemExit("no assets/stamp/couple.{jpg,png} to build from")
+        # nothing to embed: the stamp falls back to its drawn posy
+        out = ROOT / "assets" / "stamp-art.js"
+        out.write_text(HEADER + "window.STAMP_ART = \"\";\n", encoding="utf-8")
+        print("no assets/stamp/couple.{jpg,png}; stamp keeps its drawn flowers")
+        return
 
     mime = TYPES[art.suffix.lower()]
     data = base64.b64encode(art.read_bytes()).decode("ascii")
