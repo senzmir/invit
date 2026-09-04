@@ -291,15 +291,28 @@
 
 /* the flap, and the wax holding it down */
 /* The flap is two faces back to back, turning on the fold in the envelope's own
-   3D space. No z-index is swapped part-way through -- that swap was the glitch;
-   once it passes upright the browser sorts it behind the front on its own. */
+   3D space. Two nested elements: the inner one turns, the outer one owns depth.
+   Closed, it sits just in front of the envelope; open, it has folded back behind
+   everything, which is where a flap goes once the letter comes out. The depth
+   swap is instant but delayed to the moment the flap is edge-on and has no area
+   on screen, so it cannot be seen happening. */
 '.env-flap{position:absolute;left:0;top:0;width:100%;height:40%;pointer-events:none;',
-'  transform-style:preserve-3d;transform-origin:50% 0;transform:translateZ(2px) rotateX(0deg);',
+'  transform-style:preserve-3d;transform:translateZ(2px);',
+'  transition:transform 0s linear .47s}',
+'.env-flap__turn{position:absolute;inset:0;transform-style:preserve-3d;',
+'  transform-origin:50% 0;transform:rotateX(0deg);',
 '  transition:transform .95s cubic-bezier(.36,.02,.2,1)}',
 '.env-flap__face{position:absolute;inset:0;width:100%;height:100%;display:block;',
 '  backface-visibility:hidden;-webkit-backface-visibility:hidden}',
 '.env-flap__face--out{filter:drop-shadow(0 5px 7px rgba(60,44,20,.2))}',
-'.env-flap__face--in{transform:rotateX(180deg)}',
+/* The back of the flap is mirrored about the VERTICAL axis, not the horizontal
+   one. The fold is the envelope's top edge, so the turn already inverts the
+   paper top-to-bottom: mirroring the back face the same way cancels that out and
+   the flap ends up a downward V hanging above the envelope, its fold seam torn
+   away from the edge it is supposed to be attached to. Mirroring left-right
+   instead leaves the seam welded to the top edge and swings the tip over it,
+   which is what a flap does. */
+'.env-flap__face--in{transform:rotateY(180deg)}',
 '.env-seal{position:absolute;left:50%;top:40%;width:58px;height:58px;margin:-29px 0 0 -29px;',
 '  pointer-events:none;',
 '  transform:translateZ(3px);transition:opacity .35s,transform .6s;',
@@ -357,11 +370,17 @@
 '.tedge i{font-family:var(--mono);font-style:normal;font-size:8.5px;letter-spacing:.1em;color:var(--ink-2)}',
 
 /* ---------- stages ---------- */
-/* It turns TOWARDS you and over the top. Rotated the other way it sinks behind
-   the envelope front within a few degrees and all you see is a sliver -- which
-   is why it looked like it never turned at all. */
-'body[data-stage="open"] .env-flap,body[data-stage="letter"] .env-flap,body[data-stage="tickets"] .env-flap{',
-'  transform:translateZ(2px) rotateX(166deg)}',
+/* It turns TOWARDS you and over the top -- rotated the other way it sinks behind
+   the envelope front within a few degrees and all you see is a sliver, which is
+   why it once looked like it never turned at all. */
+/* Past 180, not short of it: an open flap has folded all the way back and is
+   resting against the envelope's back, leaning slightly away from you. Stopping
+   at 166 leaves it tilted towards you, so its tip sticks out in front of the
+   letter -- paper cannot come out through its own flap. */
+'body[data-stage="open"] .env-flap__turn,body[data-stage="letter"] .env-flap__turn,',
+'body[data-stage="tickets"] .env-flap__turn{transform:rotateX(188deg)}',
+'body[data-stage="open"] .env-flap,body[data-stage="letter"] .env-flap,',
+'body[data-stage="tickets"] .env-flap{transform:translateZ(-6px)}',
 'body[data-stage="open"] .env-seal,body[data-stage="letter"] .env-seal,body[data-stage="tickets"] .env-seal{opacity:0;transform:translateZ(3px) scale(.5) rotate(-32deg)}',
 'body[data-stage="open"] .slip{opacity:1}',
 'body[data-stage="open"] .slip--letter{transform:translateY(-104px) scale(1.03);transition-delay:.46s}',
@@ -830,7 +849,8 @@
       '<span class="env-stamp">' + I.stampSvg('28 · 12 · 2026', opts.stampArt) + '</span>' +
       '<span class="env-postmark">' + I.postmarkSvg() + '</span>' +
     '</div>' +
-    '<div class="env-flap">' + I.flapSvg('out') + I.flapSvg('in') + '</div>' +
+    '<div class="env-flap"><div class="env-flap__turn">' +
+      I.flapSvg('out') + I.flapSvg('in') + '</div></div>' +
     '<div class="env-seal">' + I.waxSealSvg(I.COUPLE.initials) + '</div>' +
     '<button type="button" class="env-open" data-stage-to="open">' + esc(t.envelopeOpenLabel) + '</button>' +
     '<button type="button" class="env-back-btn" data-stage-to="open">' + esc(t.backToEnvelope) + '</button>' +
