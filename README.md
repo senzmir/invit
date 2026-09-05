@@ -15,6 +15,31 @@ Three legs, one marriage:
 
 Every leg flies **1D0**.
 
+## Sending it
+
+**Send a link, not a file.** A `.html` attachment has no app associated with it on most
+phones — WhatsApp and mail apps download it and then dead-end. A link opens in any browser.
+
+The invitation is published at an unguessable address:
+
+    https://senzmir.github.io/invit/56e45cd6399d/#<the guest>
+
+Nothing links to it, it carries `noindex,nofollow`, and `docs/robots.txt` tells every crawler
+to stay away — so it is reachable only by someone you hand the address to (and by anyone they
+forward it to; it is unfindable, not secret). The guest's name and note ride in the fragment,
+the part after the `#`, which browsers **never send to the server** — so they exist only in the
+link itself and in the reader's browser. GitHub sees a request for the page and nothing more.
+
+### One-time setup
+
+On GitHub: **Settings → Pages → Source: Deploy from a branch**, branch
+`claude/wedding-invitation-airline-sjbjl4`, folder `/docs`. Save, wait a minute, and the address
+above is live.
+
+To move it to a different unguessable folder later, change `SITE` at the top of
+[`assets/invitation.js`](assets/invitation.js) and run `node tools/build-site.js` — every link
+minted after that points at the new one, and the old folder can be deleted.
+
 ## Minting an invitation
 
 Open **`minter.html`** in any browser — double-click it, no server and no install needed. It is
@@ -27,9 +52,11 @@ run `node tools/build-minter.js` to rebuild `minter.html`.)
    name needs a hand.
 2. Write a personal note, or leave it empty and the note block disappears.
 3. Pick English or Italiano.
-4. **Download invitation** saves `invitation-<name>.html`. On a phone you'll get
-   **Share invitation…** instead as the first button — that hands the file straight to WhatsApp,
-   mail, wherever, without going through a downloads folder. That single file is the whole
+4. **Copy guest link** — that is what you send. **Send the link…** hands it to the OS share
+   sheet on a phone; **Open the link** checks it yourself.
+
+The file buttons underneath still work if you ever want a standalone copy — **Download**, or
+**Share the file…** on a phone — but a file is the awkward way to send this to a guest. That single file is the whole
    invitation — fonts and artwork travel inside it, it makes no network requests, and it works
    as an email attachment on a plane. Roughly 170 KB.
 
@@ -76,6 +103,8 @@ just below, in both languages.
 | `tools/build-stamp-art.py` | regenerates `assets/stamp-art.js` from `assets/stamp/` |
 | `tools/build-example.js` | regenerates `example-invitation.html` |
 | `tools/build-minter.js` | regenerates `minter.html` from `index.html` + `assets/` |
+| `tools/build-site.js` | regenerates the published page under `docs/` |
+| `docs/` | what GitHub Pages serves — the page, plus a robots.txt that forbids crawling |
 
 The invitation is deliberately plain JavaScript with no build step and no dependencies: open a
 file, edit it, reload. The only generated file is `assets/fonts.js`.

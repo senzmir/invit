@@ -32,6 +32,13 @@ window.INVITATION = (function () {
      blue label. Both are sealed with the same red wax. */
   var ENVELOPE = 'quiet';
 
+  /* Where the invitation is published, and the unguessable folder it lives in.
+     Nothing links to it and it carries a noindex, so it is reachable only by
+     someone you hand the address to. The guest's name and note ride in the URL
+     fragment (after the #), which browsers never send to the server -- GitHub
+     sees a request for the page and nothing else. */
+  var SITE = 'https://senzmir.github.io/invit/56e45cd6399d/';
+
   var FLIGHT = '1D0';
   var CLASS = 'First';
 
@@ -229,6 +236,32 @@ window.INVITATION = (function () {
   /* ------------------------------------------------------------------ *
    * 3. Helpers
    * ------------------------------------------------------------------ */
+
+  /* The guest's details, packed small enough to live in a link. */
+  function encodePayload(data) {
+    var bytes = new TextEncoder().encode(JSON.stringify(data));
+    var bin = '', i;
+    for (i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function decodePayload(text) {
+    var t = String(text || '').replace(/^#/, '').replace(/-/g, '+').replace(/_/g, '/');
+    if (!t) return null;
+    while (t.length % 4) t += '=';
+    try {
+      var bin = atob(t), bytes = new Uint8Array(bin.length), i;
+      for (i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      var data = JSON.parse(new TextDecoder().decode(bytes));
+      return data && typeof data === 'object' ? data : null;
+    } catch (e) {
+      return null;   /* a mangled link still opens, just without a name on it */
+    }
+  }
+
+  function guestLink(data) {
+    return SITE + '#' + encodePayload(data);
+  }
 
   function esc(value) {
     return String(value == null ? '' : value)
@@ -542,6 +575,10 @@ window.INVITATION = (function () {
   return {
     COUPLE: COUPLE,
     FLIGHT: FLIGHT,
+    SITE: SITE,
+    encodePayload: encodePayload,
+    decodePayload: decodePayload,
+    guestLink: guestLink,
     ENVELOPE: ENVELOPE,
     CLASS: CLASS,
     LEGS: LEGS,

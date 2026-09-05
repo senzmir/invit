@@ -61,6 +61,13 @@
   button.primary{background:var(--accent); color:var(--accent-ink); border-color:transparent; font-weight:650}
   button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
   .status{min-height:20px; margin:10px 0 0; font-size:13px; color:var(--accent)}
+  .linkout{margin:8px 0 0}
+  .linkout code{
+    display:block; padding:9px 11px; border:1px solid var(--line-2); border-radius:6px;
+    background:#12161a; color:var(--accent); font-size:11.5px; line-height:1.45;
+    word-break:break-all; user-select:all;
+  }
+  .hint code{color:var(--text); background:#12161a; padding:1px 4px; border-radius:3px}
 
   section.stage{display:flex; flex-direction:column; min-width:0; background:#0f1214}
   .stagebar{
@@ -133,13 +140,29 @@
     <fieldset>
       <legend>Mint</legend>
       <div class="actions">
-        <button type="button" class="primary" id="share" hidden>Share invitation…</button>
-        <button type="button" class="primary" id="download">Download invitation</button>
+        <button type="button" class="primary" id="copylink">Copy guest link</button>
+        <button type="button" id="sharelink" hidden>Send the link…</button>
+        <button type="button" id="openlink">Open the link</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+      <p class="linkout"><code id="link"></code></p>
+      <p class="hint">
+        This is what you send. It opens in any browser, so it works from WhatsApp
+        or a message — unlike an attached file, which most phones can’t open.
+        The name and note travel in the part after the <code>#</code>, which
+        browsers never send to the server.
+      </p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Or as a file</legend>
+      <div class="actions">
+        <button type="button" id="share" hidden>Share the file…</button>
+        <button type="button" id="download">Download invitation</button>
         <button type="button" id="newtab">Open in a new tab</button>
         <button type="button" id="copy">Copy the HTML</button>
         <button type="button" id="reset">Clear the form</button>
       </div>
-      <p class="status" id="status" role="status"></p>
       <p class="hint" id="filename"></p>
     </fieldset>
   </form>
@@ -174,6 +197,7 @@
   var statusEl = document.getElementById('status');
   var filenameEl = document.getElementById('filename');
   var sizeEl = document.getElementById('size');
+  var linkEl = document.getElementById('link');
   var derivedEls = Array.prototype.slice.call(document.querySelectorAll('[data-derived]'));
 
   /* A derived field stops following the name once you overtype it. */
@@ -212,6 +236,12 @@
     });
   }
 
+  function guestLink() {
+    var n = names();
+    return I.guestLink({ t: passengerEl.value.trim(), n: noteEl.value.trim(), l: currentLang(),
+      f: n.full, r: n.first, s: n.short });
+  }
+
   function filename() {
     var lang = currentLang();
     var stem = lang === 'it' ? 'invito' : 'invitation';
@@ -226,6 +256,7 @@
       previewEl.srcdoc = doc;
       sizeEl.textContent = Math.round(doc.length / 1024) + ' KB';
       filenameEl.textContent = filename();
+      linkEl.textContent = guestLink();
       save();
     }, 200);
   }
@@ -278,6 +309,31 @@
   });
   Array.prototype.forEach.call(document.querySelectorAll('input[name=lang]'), function (el) {
     el.addEventListener('change', function () { syncDerived(); render(); });
+  });
+
+  document.getElementById('copylink').addEventListener('click', function () {
+    var link = guestLink();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(
+        function () { say('Link copied — paste it to them.'); },
+        function () { say('Copy failed — select the link below by hand.'); }
+      );
+    } else {
+      say('Copy unavailable here — select the link below by hand.');
+    }
+  });
+
+  var shareLinkBtn = document.getElementById('sharelink');
+  if (navigator.share) shareLinkBtn.hidden = false;
+  shareLinkBtn.addEventListener('click', function () {
+    navigator.share({ url: guestLink(), title: 'Briotto Family Airline' }).then(
+      function () { say('Sent.'); },
+      function (err) { if (err && err.name !== 'AbortError') say('Sharing failed — copy the link instead.'); }
+    );
+  });
+
+  document.getElementById('openlink').addEventListener('click', function () {
+    window.open(guestLink(), '_blank');
   });
 
   /* On a phone there is often nowhere useful to download to, and the browser may

@@ -830,6 +830,8 @@
 '<meta name="viewport" content="width=device-width,initial-scale=1">\n' +
 '<title>' + esc(t.docTitle) + (names.first ? ' · ' + esc(names.first) : '') + '</title>\n' +
 '<meta name="description" content="' + esc(t.brand + ' — ' + t.strapline) + '">\n' +
+'<meta name="robots" content="noindex,nofollow,noarchive,noimageindex">\n' +
+'<meta name="referrer" content="no-referrer">\n' +
 '<style>\n' + styles(fontCss) + '\n</style>\n' +
 '<noscript><style>.env-wrap{display:none}.panel[hidden]{display:block!important}</style></noscript>\n' +
 '</head>\n' +
