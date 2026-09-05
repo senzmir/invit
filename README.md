@@ -159,14 +159,11 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
   them; the tiles are about 10–20 KB each.
 - **The flowers are painted, not drawn**, by
   [`tools/build-flowers.py`](tools/build-flowers.py) into `assets/flowers.js`, and they frame the
-  surface the mail lies on rather than the stationery: a painting at each of the page's four
-  corners, and a border down both sides that tiles to carry the frame between them however long
-  the page runs. That border wraps top to bottom — the same flower is painted once above the
-  join and once below it, over a noise field made to repeat so the two halves line up. The frame
-  covers the whole page rather than the viewport: fixing it to the viewport makes the flowers
-  follow you down the page, but a fixed layer is only ever a screenful tall, so any capture of
-  the page, and any browser that treats fixed layers loosely once a blend mode is on them, shows
-  flowers across the top and bare ground below. Watercolour reads as watercolour because
+  surface the mail lies on rather than the stationery: two paintings, each used twice, the second
+  pair turned through half a turn so no corner repeats its neighbour. The frame is fixed to the
+  viewport — the surface does not scroll, only the mail lying on it does — so a full-page
+  screenshot shows it across the top and bare ground below, since a capture stitches together
+  shots of a layer that only ever paints one screenful. On screen it is where it should be. Watercolour reads as watercolour because
   of what happens at the edge of a wash, so every petal gets a soft body, a rim of pigment
   settled just inside its boundary, a boundary pushed around by a noise field, and granulation
   over the whole thing; washes composite by multiplication, the way transparent paint layers do,
