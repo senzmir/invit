@@ -51,10 +51,20 @@ SAGE_DEEP = (0.44, 0.53, 0.38)
 GYP = (0.99, 0.975, 0.94)
 
 
-def smooth(rng, h, w, cells):
-    """Low-frequency noise: a small random grid blown up smoothly."""
+def smooth(rng, h, w, cells, periodic=False):
+    """Low-frequency noise: a small random grid blown up smoothly.
+
+    periodic tiles the grid three by three and keeps the middle, so the field
+    repeats exactly. A tile that wraps needs that: the same flower is painted
+    once above the join and once below it, and if the field it is warped by
+    differs between the two, the two halves of that flower do not line up.
+    """
     lo = rng.normal(size=(cells, cells)).astype(np.float32)
-    img = Image.fromarray(lo, mode='F').resize((w, h), Image.BICUBIC)
+    if periodic:
+        big = Image.fromarray(np.tile(lo, (3, 3)), mode='F')
+        img = big.resize((w * 3, h * 3), Image.BICUBIC).crop((w, h, w * 2, h * 2))
+    else:
+        img = Image.fromarray(lo, mode='F').resize((w, h), Image.BICUBIC)
     out = np.asarray(img, dtype=np.float64)
     return out / (np.abs(out).max() + 1e-9)
 
@@ -67,19 +77,28 @@ class Paper:
     each of them across the full canvas is thousands of times the work.
     """
 
-    def __init__(self, w, h, seed):
+    def __init__(self, w, h, seed, wrap=False):
         rng = np.random.default_rng(seed)
         self.rng = rng
         self.w, self.h = w, h
         self.rgb = np.ones((h, w, 3))
+        # a wrapping sheet paints everything three times, once a sheet-height
+        # above and once below, so whatever crosses the join arrives on both
+        # sides of it and the tile repeats without a seam
+        self.offsets = (-h, 0, h) if wrap else (0,)
         # where the edge of a wash wanders, and how the tooth holds pigment
-        self.warp_x = smooth(rng, h, w, 13)
-        self.warp_y = smooth(rng, h, w, 13)
-        self.grain = smooth(rng, h, w, max(h, w) // 5)
+        self.warp_x = smooth(rng, h, w, 13, wrap)
+        self.warp_y = smooth(rng, h, w, 13, wrap)
+        self.grain = smooth(rng, h, w, max(h, w) // 5, wrap)
 
     def wash(self, cx, cy, rx, ry, rot=0.0, color=CREAM, opacity=0.5,
              rim=0.7, warp=None, fill=0.55, cover=0.0):
         """One stroke of transparent paint: body, settled rim, granulation."""
+        for dy in self.offsets:
+            self._wash(cx, cy + dy, rx, ry, rot, color, opacity, rim, warp,
+                       fill, cover)
+
+    def _wash(self, cx, cy, rx, ry, rot, color, opacity, rim, warp, fill, cover):
         if warp is None:
             warp = 0.10 * min(rx, ry) + 1.2
         reach = 1.12 * max(rx, ry) + warp + 2
@@ -120,6 +139,12 @@ class Paper:
         widest part wherever those two exponents put it. Leaves are the same
         shape with the two exponents equal.
         """
+        for dy in self.offsets:
+            self._petal(cx, cy + dy, rot, length, width, color, opacity, tip,
+                        base, rim, fill, warp, cover)
+
+    def _petal(self, cx, cy, rot, length, width, color, opacity, tip, base,
+               rim, fill, warp, cover):
         if warp is None:
             warp = 0.10 * width + 1.2
         reach = 1.15 * length + warp + 2
@@ -320,6 +345,29 @@ def corner(size, seed, mirror=False):
     return finish(p, size, mirror)
 
 
+def edge(width, height, seed):
+    """A vertical border that tiles: flowers down a stem, wrapping top to bottom."""
+    w, h = width * SS, height * SS
+    p = Paper(w, h, seed, wrap=True)
+    ux, uy = w / 100.0, h / 100.0
+
+    # one stem running the length of the strip, leaving and entering at the same
+    # x so the join is invisible, and two short ones reaching inward
+    sprig(p, 26 * ux, -2 * uy, 76 * ux, 34 * uy, 26 * ux, 102 * uy, leaves=11)
+    sprig(p, 12 * ux, 22 * uy, 54 * ux, 34 * uy, 88 * ux, 30 * uy, leaves=5, scale=0.8)
+    sprig(p, 10 * ux, 74 * uy, 48 * ux, 84 * uy, 84 * ux, 78 * uy, leaves=5, scale=0.8)
+
+    gypsophila(p, 70 * ux, 12 * uy, 15 * ux, rot=0.4)
+    gypsophila(p, 22 * ux, 58 * uy, 14 * ux, rot=2.4)
+    yellow_bloom(p, 78 * ux, 62 * uy, 10 * ux, p.rng.uniform(0, 2))
+    forget_me_not_cluster(p, 62 * ux, 40 * uy, 3.4 * ux, rot=1.2, n=6, spread=3.4)
+    forget_me_not_cluster(p, 16 * ux, 90 * uy, 3.2 * ux, rot=0.4, n=5, spread=3.2)
+    forget_me_not_cluster(p, 30 * ux, 4 * uy, 3.2 * ux, rot=2.6, n=5, spread=3.2)
+    blossom(p, 40 * ux, 24 * uy, 13 * ux, p.rng.uniform(0, 2))
+    blossom(p, 66 * ux, 86 * uy, 11 * ux, p.rng.uniform(0, 2), tint=ROSE)
+    return finish(p, width, None, height)
+
+
 def spray(width, height, seed):
     """A small horizontal spray for a letterhead."""
     w, h = width * SS, height * SS
@@ -350,9 +398,9 @@ def finish(p, width, mirror, height=None):
 
 def main():
     art = {
+        'edge': (edge(300, 700, 5150), 88),
         'cornerA': (corner(560, 4471), 88),
         'cornerB': (corner(560, 90210, mirror=True), 88),
-        'spray': (spray(520, 190, 7788), 90),
     }
     out = {}
     for name, (img, quality) in art.items():

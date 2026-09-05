@@ -227,6 +227,7 @@
 '  --paper-tex:url(' + (tex.paper || '') + ');',
 '  --motif-tex:url(' + (tex.motif || '') + ');',
 '  --bloom-a:url(' + (flo.cornerA || '') + ');',
+'  --bloom-edge:url(' + (flo.edge || '') + ');',
 '  --bloom-b:url(' + (flo.cornerB || '') + ');',
 /* Boarding passes are not printed on writing paper. Ticket stock is thinner and
    whiter, drawn through a press lengthwise, so it gets its own tile and colour. */
@@ -528,19 +529,34 @@
 '.letter__strap{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2)}',
 /* Painted on white and multiplied onto the ground, so the surface's own grain
    carries straight through the flowers instead of a white box sitting on top of
-   them. Fixed and behind everything, so the mail lies inside the frame. */
-/* The blend belongs on the group, not on each painting. A fixed, stacked layer
-   is an isolated group: a child blending inside it has nothing but the group's
-   own transparency to blend with, so the white it was painted on stays white
-   and every flower arrives in a white box. */
-'.garden{position:fixed;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:multiply}',
+   them.
+
+   The frame covers the whole page rather than the viewport. Fixing it to the
+   viewport is tempting -- the flowers then follow you down the page -- but a
+   fixed layer is only ever a screenful tall, so any capture of the page, and
+   any browser that treats fixed layers loosely once a blend mode is on them,
+   shows flowers across the top of the page and bare ground below. Absolute
+   inside the body, which is already positioned, spans the document instead.
+
+   The blend belongs on the group, not on each painting: a stacked layer like
+   this one is an isolated group, so a child blending inside it has nothing but
+   the group's own transparency to blend with, and every flower would arrive in
+   a white box. */
+'.garden{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;',
+'  mix-blend-mode:multiply}',
 '.bloom{position:absolute;width:min(34vw,440px);aspect-ratio:1;',
 '  background:var(--bloom-a) center/contain no-repeat}',
-'.bloom--tl{top:-2vh;left:-2vw}',
-'.bloom--tr{top:-2vh;right:-2vw;background-image:var(--bloom-b)}',
-'.bloom--bl{bottom:-2vh;left:-2vw;background-image:var(--bloom-b);transform:rotate(180deg)}',
-'.bloom--br{bottom:-2vh;right:-2vw;transform:rotate(180deg)}',
-'@media (max-width:640px){.bloom{width:54vw}}',
+'.bloom--tl{top:-14px;left:-2vw}',
+'.bloom--tr{top:-14px;right:-2vw;background-image:var(--bloom-b)}',
+'.bloom--bl{bottom:-14px;left:-2vw;background-image:var(--bloom-b);transform:rotate(180deg)}',
+'.bloom--br{bottom:-14px;right:-2vw;transform:rotate(180deg)}',
+/* the tiling border between them: the painting wraps top to bottom, so it can
+   repeat down a page of any length without a join */
+'.hedge{position:absolute;top:0;bottom:0;width:min(21vw,260px);',
+'  background:var(--bloom-edge) 50% 0/100% auto repeat-y}',
+'.hedge--l{left:-3vw}',
+'.hedge--r{right:-3vw;transform:scaleX(-1)}',
+'@media (max-width:640px){.bloom{width:54vw}.hedge{width:34vw}}',
 '.letter__ref{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 21px;',
 '  padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);',
 '  font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}',
@@ -866,11 +882,13 @@
 '</head>\n' +
 '<body data-stage="sealed" data-envelope="' + envelope + '">\n' +
 
-/* The flowers grow round the edge of the surface, not on the stationery: two
-   paintings, each used twice, the second pair turned through half a turn so no
-   corner repeats its neighbour. Fixed, so the frame holds while the mail
-   scrolls through it. */
+/* The flowers grow round the edge of the surface, not on the stationery: a
+   corner painting at each of the page's four corners -- two paintings, the
+   second pair turned through half a turn so no corner repeats its neighbour --
+   and a tiling border down both sides to carry the frame between them however
+   long the page runs. */
 '<div class="garden" aria-hidden="true">' +
+  '<span class="hedge hedge--l"></span><span class="hedge hedge--r"></span>' +
   '<span class="bloom bloom--tl"></span><span class="bloom bloom--tr"></span>' +
   '<span class="bloom bloom--bl"></span><span class="bloom bloom--br"></span>' +
 '</div>\n' +
