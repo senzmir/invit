@@ -439,8 +439,10 @@ window.INVITATION = (function () {
 
     /* the engraved posy -- or a picture, if one is dropped into assets/stamp/ */
     var panel = art
-      ? '<image href="' + esc(art) + '" xlink:href="' + esc(art) + '" ' +
-          'x="7" y="7" width="74" height="76" preserveAspectRatio="xMidYMin slice" ' +
+      /* href only -- carrying xlink:href too duplicated the whole picture in
+         every invitation for the sake of browsers older than 2018 */
+      ? '<image href="' + esc(art) + '" ' +
+          'x="7" y="7" width="74" height="76" preserveAspectRatio="xMidYMid meet" ' +
           'clip-path="url(#bfa-stamp-clip)"/>'
       : '<g transform="translate(7 9) scale(.74)">' + posySvg() + '</g>';
 
@@ -451,8 +453,6 @@ window.INVITATION = (function () {
         '<defs><clipPath id="bfa-stamp-clip"><rect x="7" y="7" width="74" height="76" rx="1"/></clipPath></defs>' +
         '<rect width="' + w + '" height="' + h + '" fill="' + PAPER + '"/>' +
         panel +
-        '<rect x="7" y="7" width="74" height="76" rx="1" fill="none" ' +
-          'stroke="rgba(18,58,77,.35)" stroke-width=".7"/>' +
         '<rect x="5" y="5" width="' + (w - 10) + '" height="' + (h - 10) + '" fill="none" ' +
           'stroke="#a83f2a" stroke-width=".9"/>' +
         '<text x="' + (w / 2) + '" y="96.5" text-anchor="middle" ' +

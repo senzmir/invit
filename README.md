@@ -100,6 +100,7 @@ just below, in both languages.
 | `assets/fonts/` | the source `.woff2` files and their SIL Open Font Licences |
 | `example-invitation.html` | a minted sample, for looking at and test-printing |
 | `tools/build-fonts.py` | regenerates `assets/fonts.js` from `assets/fonts/` |
+| `tools/prepare-stamp-art.py` | fits a round stamp illustration to the frame |
 | `tools/build-stamp-art.py` | regenerates `assets/stamp-art.js` from `assets/stamp/` |
 | `tools/build-example.js` | regenerates `example-invitation.html` |
 | `tools/build-minter.js` | regenerates `minter.html` from `index.html` + `assets/` |
@@ -111,12 +112,17 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
 
 ## Notes on the invitation
 
-- **The stamp is a posy**, drawn in blush and sage with the date on the band underneath, and
-  the same flowers appear as a sprig on the letterhead. To put a picture there instead — a
-  photograph, or a drawing when the artist delivers one — save it as `assets/stamp/couple.jpg`
-  (or `.png`) and run `python3 tools/build-stamp-art.py`; portrait, roughly 4:5, a few hundred
-  pixels wide is plenty. Remove the file and run it again to go back to the flowers.
-  The flower colours are the `BLOOM` block at the top of `assets/invitation.js`.
+- **The stamp carries the drawing of you two**, with the date on the band underneath, and a
+  sprig of the same flowers sits on the letterhead. To swap the drawing for another one:
+
+      python3 tools/prepare-stamp-art.py <the new picture>
+      python3 tools/build-stamp-art.py
+
+  The first crops off the design's own scalloped rim (the frame draws its own perforations, and
+  two sets of teeth is one too many) and maps it onto the stamp's paper and ink so the artwork's
+  ground and the stamp stock are the same colour with no seam. Delete
+  `assets/stamp/couple.png` and rerun the second to fall back to the drawn posy, whose colours
+  are the `BLOOM` block at the top of `assets/invitation.js`.
 - **The envelope is the same design at every size.** Everything inside it — type, stamp,
   cancellation, wax seal — is sized off one `--w` custom property set to the envelope's own
   width, so a phone gets the same composition as a desktop, just smaller, rather than a
