@@ -100,6 +100,7 @@ just below, in both languages.
 | `assets/fonts/` | the source `.woff2` files and their SIL Open Font Licences |
 | `example-invitation.html` | a minted sample, for looking at and test-printing |
 | `tools/build-fonts.py` | regenerates `assets/fonts.js` from `assets/fonts/` |
+| `tools/build-textures.py` | renders the paper and linen tiles into `assets/textures.js` |
 | `tools/prepare-stamp-art.py` | fits a round stamp illustration to the frame |
 | `tools/build-stamp-art.py` | regenerates `assets/stamp-art.js` from `assets/stamp/` |
 | `tools/build-example.js` | regenerates `example-invitation.html` |
@@ -142,10 +143,16 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
   swings down, the shadow along the crease lifts, and then the scaffold is thrown away and the
   actual letter takes its place — so print, text selection and screen readers only ever see one
   letter. The faint crease line across the middle stays, the way paper remembers a fold.
-- **It is meant to read as paper on a table, not as cards on a page.** Everything lies on a
-  lit surface with the corners falling away; light falls across each sheet, the cut edge
-  catches it, the far edge curves off, and every sheet carries a fine grain. The letter has
-  a second page showing a sliver of its edge behind the first.
+- **It is meant to read as paper on a table, not as cards on a page.** Everything lies on woven
+  linen under a pool of light with the corners falling away; light falls across each sheet, the
+  cut edge catches it, and the far edge curves off. The letter has a second page showing a sliver
+  of its edge behind the first.
+- **The paper and the linen are real textures**, rendered by
+  [`tools/build-textures.py`](tools/build-textures.py) into `assets/textures.js`. They are built
+  in the frequency domain — a random field shaped by a 1/f falloff and inverse-transformed —
+  which gives layered scales rather than one uniform fizz, fibre by stretching the falloff along
+  an axis, and seamless tiles for free, since an inverse FFT is periodic. Rerun it to change
+  them; the tiles are about 20–30 KB each.
 - **The passes are dealt out** of the envelope one after another, landing overlapped and each
   at its own angle, the way tickets fall. They have punched perforations and notched corners
   along the tear line. On paper they straighten up and separate again.

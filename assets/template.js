@@ -206,26 +206,27 @@
     '</div>';
   }
 
-  function styles(fontCss) {
+  function styles(fontCss, tex) {
     return fontCss + '\n' + [
 '*,*::before,*::after{box-sizing:border-box}',
 'html{-webkit-text-size-adjust:100%}',
 /* headroom for the letter and the passes to rise out of the envelope */
 'body{margin:0;padding:clamp(168px,18vh,196px) 16px 96px;min-height:100vh;',
 '  font-family:"Cormorant Garamond",Garamond,"Hoefler Text","Times New Roman",serif;',
-'  color:#201c17;background:#d8c6b1;',
+'  color:#201c17;background-color:#cdb69e;',
+'  background-image:var(--linen-tex);background-size:400px 400px;',
 '  display:flex;flex-direction:column;align-items:center;position:relative}',
-/* The surface everything is lying on: warm linen under a pool of light, corners
-   falling away. It used to be a near-black teal, which made a cream envelope and
-   a single dark posy read as a condolence card rather than a wedding. */
-'body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;',
-'  background:radial-gradient(1100px 700px at 50% -6%,#f0e2cf 0%,#e2d0ba 40%,#cdb69e 74%,#b89c81 100%)}',
-'body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;',
-'  background-image:var(--grain);background-size:230px 230px;opacity:.34;mix-blend-mode:multiply}',
+/* The surface everything lies on is woven cloth, with a pool of light over it and
+   the corners falling away. The cloth scrolls with the page; the light does not,
+   so it stays overhead. */
+'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;',
+'  background:radial-gradient(1150px 720px at 50% -6%,rgba(255,248,236,.6) 0%,',
+'    rgba(255,246,232,.14) 38%,rgba(92,66,42,.15) 72%,rgba(74,50,28,.4) 100%)}',
 ':root{--paper:#f7f1e3;--paper-2:#efe6d3;--ink:#201c17;--ink-2:#6d6153;',
 '  --line:#cbbca1;--blue:#123a4d;--red:#a83f2a;--gold:#b3893f;',
 '  --mono:"Courier Prime","Courier New",monospace;',
-'  --grain:' + I.paperGrain('.82', 4) + ';',
+'  --paper-tex:url(' + (tex.paper || '') + ');',
+'  --linen-tex:url(' + (tex.linen || '') + ');',
 /* Paper is not a flat fill. Light falls across a sheet, the cut edge catches it,
    and the far edge curves away -- these three do most of the work. */
 '  --sheen:linear-gradient(163deg,rgba(255,255,255,.62),rgba(255,255,255,.14) 30%,rgba(255,255,255,0) 58%);',
@@ -235,12 +236,11 @@
 '  --lift:0 2px 3px -1px rgba(70,48,24,.3),0 15px 20px -11px rgba(70,48,24,.28),',
 '    0 46px 66px -34px rgba(60,40,20,.4)}',
 
-/* Every sheet in the piece carries grain: it is the difference between a cream
-   rectangle and a piece of paper. */
+/* Every sheet carries the paper tile itself rather than a noise overlay -- it has
+   fibre, mottling and tooth in it, where one octave of fractal noise only ever
+   gave a uniform fizz. It sits beneath the lighting gradients, which are
+   semi-transparent, so both read at once. */
 '.paper{position:relative;isolation:isolate}',
-'.paper::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;',
-'  background-image:var(--grain);background-size:210px 210px;opacity:.3;',
-'  mix-blend-mode:multiply;border-radius:inherit}',
 
 /* ---------- the envelope ---------- */
 /* One width drives everything inside the envelope, so the composition is the
@@ -263,12 +263,10 @@
 '  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 28px 58px -28px rgba(60,40,20,.5)}',
 
 /* the address face */
-'.env-front{position:absolute;inset:0;z-index:3;border-radius:4px;background:var(--paper);',
+'.env-front{position:absolute;inset:0;z-index:3;border-radius:4px;',
+'  background:var(--paper-tex) 0 0/216px 216px repeat,var(--paper);',
 '  pointer-events:none;',
 '  box-shadow:0 6px 14px -12px rgba(60,44,20,.75) inset,0 -1px 0 rgba(120,100,64,.22) inset}',
-/* lighter grain here than on the letter, so the face keeps the warmth of the
-   drawn flap instead of drifting grey next to it */
-'.env-front::after{opacity:.2}',
 /* the airmail band: fine, and at the edge where it belongs */
 '.env-front::before{content:"";position:absolute;inset:0;border-radius:4px;padding:6px;',
 '  background:repeating-linear-gradient(115deg,var(--red) 0 7px,transparent 7px 15px,',
@@ -343,7 +341,7 @@
 
 /* the quieter envelope: no stripes, a hairline rule, teal wax */
 /* the quieter envelope: no stripes, just a hairline plate rule */
-'body[data-envelope="quiet"] .env-front{background:#faf3e3}',
+'body[data-envelope="quiet"] .env-front{background:var(--paper-tex) 0 0/216px 216px repeat,#faf3e3}',
 'body[data-envelope="quiet"] .env-front::before{background:none;padding:0;',
 '  border:1px solid rgba(120,100,64,.4);inset:9px;border-radius:2px;opacity:1;',
 '  -webkit-mask:none;mask:none}',
@@ -359,7 +357,7 @@
 '  transition:transform .9s cubic-bezier(.2,.72,.2,1),opacity .45s;',
 '  filter:drop-shadow(0 -7px 16px rgba(70,48,24,.26))}',
 '.slip__inner{display:block;border:1px solid var(--line);border-bottom:0;border-radius:3px 3px 0 0;',
-'  background:var(--sheen),var(--paper);padding:12px 16px 74px;text-align:left;',
+'  background:var(--sheen),var(--paper-tex) 0 0/216px 216px repeat,var(--paper);padding:12px 16px 74px;text-align:left;',
 '  box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}',
 '.slip__caption{display:block;font-family:var(--mono);font-size:9.5px;',
 '  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}',
@@ -374,7 +372,8 @@
 
 /* the passes: tucked in on the right, angled, only their corner showing */
 '.slip--tickets{right:2%;width:34%;z-index:2;transform:translateY(44px) rotate(-10deg)}',
-'.slip--tickets .slip__inner{background:var(--sheen),#f3ead7;padding:11px 14px 66px;text-align:right}',
+'.slip--tickets .slip__inner{background:var(--sheen),var(--paper-tex) 0 0/216px 216px repeat,#f3ead7;',
+'  padding:11px 14px 66px;text-align:right}',
 '.tedges{display:block;margin-top:9px}',
 '.tedge{display:flex;align-items:baseline;justify-content:flex-end;gap:9px;',
 '  padding:6px 10px;background:var(--paper);border:1px solid var(--line);border-top:0;',
@@ -504,7 +503,7 @@
 '  border-radius:1px;background:#efe6d3;transform:rotate(.5deg);transform-origin:50% 0;',
 '  box-shadow:0 2px 3px -1px rgba(70,48,24,.28),0 30px 44px -26px rgba(60,40,20,.38)}',
 '.letter{position:relative;z-index:1;border-radius:1px;padding:clamp(24px,4.4vw,50px);',
-'  background:var(--sheen),var(--curve),var(--paper);',
+'  background:var(--sheen),var(--curve),var(--paper-tex) 0 0/216px 216px repeat,var(--paper);',
 '  box-shadow:var(--cut-edge),var(--lift);',
 '  line-height:1.6;font-size:clamp(17px,2.1vw,19px)}',
 '.letter__head{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--blue);text-align:center}',
@@ -548,7 +547,7 @@
 /* --stub is both the stub's width and where the tear line falls, so the punched
    notches at top and bottom line up with the perforation between them. */
 '.pass{--stub:186px;display:flex;border-radius:3px;margin:0 0 24px;',
-'  background:var(--sheen),var(--curve),var(--paper);',
+'  background:var(--sheen),var(--curve),var(--paper-tex) 0 0/216px 216px repeat,var(--paper);',
 '  box-shadow:inset 0 1px 0 rgba(255,255,255,.62),inset 0 -1px 0 rgba(120,100,64,.2);',
 '  filter:drop-shadow(0 1px 0 rgba(70,48,24,.26)) drop-shadow(0 3px 3px rgba(70,48,24,.22))',
 '    drop-shadow(0 27px 34px rgba(60,40,20,.32));',
@@ -595,7 +594,8 @@
 '.pass__follow{margin-top:8px!important;font-family:var(--mono);font-size:10px;',
 '  letter-spacing:.2em;text-transform:uppercase;color:var(--red)}',
 '.pass__stub{position:relative;flex:0 0 var(--stub);padding:clamp(16px,2.4vw,20px);',
-'  background:linear-gradient(163deg,rgba(255,255,255,.4),rgba(255,255,255,0) 44%),#f1e8d5;',
+'  background:linear-gradient(163deg,rgba(255,255,255,.4),rgba(255,255,255,0) 44%),',
+'    var(--paper-tex) 0 0/216px 216px repeat,#f1e8d5;',
 '  display:flex;flex-direction:column;gap:11px}',
 /* the perforation: punched dots, not a dashed rule */
 '.pass__stub::before{content:"";position:absolute;left:-5px;top:10px;bottom:10px;width:10px;z-index:2;',
@@ -665,7 +665,6 @@
 '    -webkit-mask-image:none;mask-image:none;border:1px solid #b9a888;',
 '    border-radius:0;background:#f7f1e3}',
 '  .pass:hover{transform:none}',
-'  .paper::after{display:none}',
 '  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}',
 '  @page{size:A4 portrait;margin:12mm}',
 '}'
@@ -823,7 +822,7 @@
 '<meta name="description" content="' + esc(t.brand + ' — ' + t.strapline) + '">\n' +
 '<meta name="robots" content="noindex,nofollow,noarchive,noimageindex">\n' +
 '<meta name="referrer" content="no-referrer">\n' +
-'<style>\n' + styles(fontCss) + '\n</style>\n' +
+'<style>\n' + styles(fontCss, opts.textures || {}) + '\n</style>\n' +
 '<noscript><style>.env-wrap{display:none}.panel[hidden]{display:block!important}</style></noscript>\n' +
 '</head>\n' +
 '<body data-stage="sealed" data-envelope="' + envelope + '">\n' +

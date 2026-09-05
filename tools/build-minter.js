@@ -29,8 +29,8 @@ html = html.replace(tag, (match, rel) => {
   return '<script>\n/* ' + rel + ' */\n' + code + '\n</script>';
 });
 
-if (inlined !== 4) {
-  throw new Error('expected to inline 4 asset scripts, inlined ' + inlined);
+if (inlined !== 5) {
+  throw new Error('expected to inline 5 asset scripts, inlined ' + inlined);
 }
 
 html = html.replace(

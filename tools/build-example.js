@@ -13,6 +13,7 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 global.window = {};
 require(path.join(root, 'assets', 'fonts.js'));
+require(path.join(root, 'assets', 'textures.js'));
 require(path.join(root, 'assets', 'stamp-art.js'));
 require(path.join(root, 'assets', 'invitation.js'));
 require(path.join(root, 'assets', 'template.js'));
@@ -22,7 +23,8 @@ const html = window.INVITATION.buildDocument({
   note: 'We could not picture a single one of these three days without you in it.\n\nBring nothing but yourself — and an appetite for the Italian leg.',
   lang: 'en',
   fontCss: window.INVITATION_FONT_CSS,
-  stampArt: window.STAMP_ART
+  stampArt: window.STAMP_ART,
+  textures: window.TEXTURES
 });
 
 const out = path.join(root, 'example-invitation.html');

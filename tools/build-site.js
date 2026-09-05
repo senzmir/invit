@@ -22,6 +22,7 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 global.window = {};
 require(path.join(root, 'assets', 'fonts.js'));
+require(path.join(root, 'assets', 'textures.js'));
 require(path.join(root, 'assets', 'stamp-art.js'));
 require(path.join(root, 'assets', 'invitation.js'));
 require(path.join(root, 'assets', 'template.js'));
@@ -53,7 +54,8 @@ const bootstrap = `
       note: data.n || '',
       lang: data.l === 'it' ? 'it' : 'en',
       fontCss: window.INVITATION_FONT_CSS,
-      stampArt: window.STAMP_ART
+      stampArt: window.STAMP_ART,
+      textures: window.TEXTURES
     });
     document.open();
     document.write(html);
@@ -83,6 +85,10 @@ const page = `<!doctype html>
 <script>
 /* assets/fonts.js */
 ${read('assets/fonts.js')}
+</script>
+<script>
+/* assets/textures.js */
+${read('assets/textures.js')}
 </script>
 <script>
 /* assets/stamp-art.js */
