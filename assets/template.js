@@ -133,37 +133,48 @@
         '</div>'
       : '';
 
+    /* Two sheets of A4, not one very long one. A single crease across the
+       middle of a page four screens tall is not a fold anybody has ever made;
+       across the middle of an A4 page, which is what went into the envelope,
+       it is exactly right. Each sheet carries its own. */
     return '' +
-    '<article class="letter paper">' +
-      '<header class="letter__head">' +
-        '<span class="letter__mark">' + I.roundelSvg(46) + '</span>' +
-        '<span class="letter__brand">' + esc(t.brand) + '</span>' +
-        '<span class="letter__strap">' + esc(t.strapline) + '</span>' +
-      '</header>' +
+    '<article class="letter">' +
+      '<div class="sheet paper">' +
+        '<header class="letter__head">' +
+          '<span class="letter__mark">' + I.roundelSvg(46) + '</span>' +
+          '<span class="letter__brand">' + esc(t.brand) + '</span>' +
+          '<span class="letter__strap">' + esc(t.strapline) + '</span>' +
+        '</header>' +
 
-      '<div class="letter__ref">' +
-        '<span>' + esc(t.bookingTitle) + '</span>' +
-        '<span>' + esc(t.refLabel) + ' · ' + esc(I.FLIGHT) + '-28122026</span>' +
+        '<div class="letter__ref">' +
+          '<span>' + esc(t.bookingTitle) + '</span>' +
+          '<span>' + esc(t.refLabel) + ' · ' + esc(I.FLIGHT) + '-28122026</span>' +
+        '</div>' +
+
+        '<p class="letter__greeting">' + esc(t.greeting(names.first)) + '</p>' +
+        t.letterBody.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
+
+        '<section class="letter__itin">' +
+          '<h3>' + esc(t.itineraryTitle) + '</h3>' +
+          '<ul class="itin">' + itinerary + '</ul>' +
+        '</section>' +
+        '<span class="sheet__crease" aria-hidden="true"></span>' +
+        '<span class="sheet__no">' + esc(t.pageOf(1, 2)) + '</span>' +
       '</div>' +
 
-      '<p class="letter__greeting">' + esc(t.greeting(names.first)) + '</p>' +
-      t.letterBody.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
+      '<div class="sheet paper">' +
+        noteBlock +
 
-      '<section class="letter__itin">' +
-        '<h3>' + esc(t.itineraryTitle) + '</h3>' +
-        '<ul class="itin">' + itinerary + '</ul>' +
-      '</section>' +
+        '<footer class="letter__sign">' +
+          '<p class="signoff">' + esc(t.signOff) + '</p>' +
+          '<p class="couple">' + esc(I.COUPLE.shortOne) + ' &amp; ' + esc(I.COUPLE.shortTwo) + '</p>' +
+          '<p class="couple couple--full">' + esc(I.COUPLE.one) + ' &amp; ' + esc(I.COUPLE.two) + '</p>' +
+        '</footer>' +
 
-      noteBlock +
-
-      '<footer class="letter__sign">' +
-        '<p class="signoff">' + esc(t.signOff) + '</p>' +
-        '<p class="couple">' + esc(I.COUPLE.shortOne) + ' &amp; ' + esc(I.COUPLE.shortTwo) + '</p>' +
-        '<p class="couple couple--full">' + esc(I.COUPLE.one) + ' &amp; ' + esc(I.COUPLE.two) + '</p>' +
-      '</footer>' +
-
-      '<p class="letter__small">' + esc(t.smallPrint) + '</p>' +
-      '<span class="letter__crease" aria-hidden="true"></span>' +
+        '<p class="letter__small">' + esc(t.smallPrint) + '</p>' +
+        '<span class="sheet__crease" aria-hidden="true"></span>' +
+        '<span class="sheet__no">' + esc(t.pageOf(2, 2)) + '</span>' +
+      '</div>' +
     '</article>';
   }
 
@@ -486,12 +497,18 @@
 '  background:linear-gradient(180deg,rgba(58,42,18,.26),rgba(58,42,18,.04));',
 '  opacity:1;transition:opacity .6s ease-out}',
 '.fold.is-open .fold__panel--bottom::after{opacity:0}',
-/* paper remembers its crease */
-'.letter{--crease:0}',
-'.letter__crease{position:absolute;left:0;right:0;top:50%;height:16px;margin-top:-9px;',
+/* paper remembers its crease -- across the middle of each A4 sheet, which is
+   where the fold that put it in the envelope actually fell */
+'.sheet__crease{position:absolute;left:0;right:0;top:50%;height:16px;margin-top:-9px;',
 '  pointer-events:none;z-index:2;background:linear-gradient(180deg,',
-'    rgba(112,88,48,0),rgba(112,88,48,.11) 46%,rgba(112,88,48,.17) 53%,',
-'    rgba(255,255,255,.55) 60%,rgba(255,255,255,0) 78%)}',
+'    rgba(112,88,48,0),rgba(112,88,48,.10) 46%,rgba(112,88,48,.15) 53%,',
+'    rgba(255,255,255,.5) 60%,rgba(255,255,255,0) 78%)}',
+/* Below about 600px the type can no longer be shrunk to keep an A4 page's worth
+   of words on an A4 page without making it unreadable, so the first sheet runs
+   longer than the paper it stands for. A crease across the middle of a sheet
+   that is no longer A4 is just a line through the middle of a paragraph, so
+   there is no crease there. */
+'@media (max-width:600px){.sheet__crease{display:none}}',
 
 /* ---------- the passes are dealt out ---------- */
 /* dropped, not listed: they overlap a little and sit at their own angles */
@@ -513,16 +530,22 @@
 '@keyframes fadein{from{opacity:0}to{opacity:1}}',
 
 /* ---------- letter ---------- */
-/* the sheet underneath, showing a sliver of its edge */
 '.panel--letter{position:relative}',
-'.letter__behind{position:absolute;left:11px;right:-11px;top:9px;bottom:-9px;z-index:0;',
-'  border-radius:1px;background:#efe6d3;transform:rotate(.5deg);transform-origin:50% 0;',
-'  box-shadow:0 2px 3px -1px rgba(70,48,24,.28),0 30px 44px -26px rgba(60,40,20,.38)}',
-'.letter{position:relative;z-index:1;border-radius:1px;overflow:hidden;',
-'  padding:clamp(34px,5.2vw,62px) clamp(24px,4.4vw,50px);',
+'.letter{position:relative;z-index:1;display:flex;flex-direction:column;',
+'  gap:clamp(16px,2.4vw,28px)}',
+'.sheet{position:relative;border-radius:1px;overflow:hidden;',
+'  padding:clamp(30px,4.6vw,54px) clamp(24px,4.4vw,50px) clamp(48px,5.6vw,66px);',
 '  background:var(--sheen),var(--curve),var(--paper-tex) 0 0/216px 216px repeat,var(--paper);',
 '  box-shadow:var(--cut-edge),var(--lift);',
 '  line-height:1.6;font-size:clamp(17px,2.1vw,19px)}',
+/* A4. A zero-width float whose top padding is a percentage of the sheet's own
+   width holds it to the proportions of the paper it stands in for; a long
+   personal note can still push it taller, which is what a second sheet of the
+   real thing would do too. */
+'.sheet::before{content:"";display:block;float:left;width:0;padding-top:141.4%}',
+'.sheet__no{position:absolute;left:0;right:0;bottom:clamp(20px,2.6vw,28px);text-align:center;',
+'  font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;',
+'  color:var(--ink-2);opacity:.55}',
 '.letter__head{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--blue);text-align:center}',
 '.letter__brand{font-size:clamp(23px,3.6vw,30px);font-weight:700;letter-spacing:.02em}',
 '.letter__strap{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2)}',
@@ -701,7 +724,7 @@
 '@media print{',
 '  body{background:#fff!important;background-image:none!important;padding:0;display:block}',
 '  .env-wrap,.putback,.pagefoot,.tearline,.tickets__intro,.panel--letter,',
-'  .letter__behind,.garden{display:none!important}',
+'  .garden{display:none!important}',
 '  .panel--tickets,.panel--tickets[hidden]{display:block!important;width:100%;margin:0;animation:none}',
 /* on paper they lie square and separate again: the deal animation sets a
    transform, and an animation beats a plain declaration, so this has to shout */
@@ -909,7 +932,6 @@
 '<p class="putback">' + esc(t.backToEnvelope) + '</p>\n' +
 
 '<section class="panel panel--letter" id="panel-letter" hidden>' +
-  '<span class="letter__behind" aria-hidden="true"></span>' +
   letter(t, names, note) +
 '</section>\n' +
 '<section class="panel panel--tickets" id="panel-tickets" hidden>' +

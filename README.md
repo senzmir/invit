@@ -143,11 +143,18 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
   the letter, hinged along the middle, with the bottom half folded back behind the top one. It
   swings down, the shadow along the crease lifts, and then the scaffold is thrown away and the
   actual letter takes its place — so print, text selection and screen readers only ever see one
-  letter. The faint crease line across the middle stays, the way paper remembers a fold.
+  letter.
+- **The letter is two sheets of A4, not one long page.** A zero-width float whose top padding is
+  a percentage of the sheet's own width holds each to the proportions of the paper it stands
+  for; a long personal note can push the second one taller, as a real second sheet would be. The
+  faint crease each sheet keeps sits across its own middle, where the fold that put it in the
+  envelope actually fell — a single crease down the middle of one very long page is not a fold
+  anybody has ever made. Below about 600px the type cannot shrink far enough to keep an A4
+  page's worth of words on an A4 page and still be readable, so the first sheet runs longer than
+  the paper and the crease is dropped rather than drawn through the middle of a paragraph.
 - **It is meant to read as paper on a table, not as cards on a page.** Everything lies on a
   plain near-white surface inside a painted floral frame; light falls across each sheet, the cut
-  edge catches it, and the far edge curves off. The letter has a second page showing a sliver of
-  its edge behind the first. There is deliberately no pool of light over the surface: any such
+  edge catches it, and the far edge curves off. There is deliberately no pool of light over the surface: any such
   overlay is only ever as tall as the viewport, so down a long page it ends in a hard horizontal
   edge across the middle of the ground.
 - **The papers are real textures**, rendered by

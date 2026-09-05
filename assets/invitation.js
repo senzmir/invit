@@ -106,6 +106,7 @@ window.INVITATION = (function () {
         'Full details for each leg will follow in good time. For now, all you need to do is say yes.'
       ],
       itineraryTitle: 'Your itinerary',
+      pageOf: function (n, of) { return 'Page ' + n + ' of ' + of; },
       noteTitle: 'A note for you',
       signOff: 'With all our love,',
       smallPrint: 'This booking is non-transferable, infinitely refundable in love, and requires no luggage but yourselves. Changes to the itinerary will be communicated by the Briotto Family Airline in due course.',
@@ -182,6 +183,7 @@ window.INVITATION = (function () {
         'Tutti i dettagli di ogni tratta arriveranno a tempo debito. Per ora ti basta dire di sì.'
       ],
       itineraryTitle: 'Il tuo itinerario',
+      pageOf: function (n, of) { return 'Pagina ' + n + ' di ' + of; },
       noteTitle: 'Due righe per te',
       signOff: 'Con tutto il nostro affetto,',
       smallPrint: 'Questa prenotazione non è cedibile, è infinitamente rimborsabile in affetto e non richiede altro bagaglio che voi stessi. Eventuali modifiche all’itinerario saranno comunicate dalla Briotto Family Airline a tempo debito.',
