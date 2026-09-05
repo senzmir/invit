@@ -247,7 +247,15 @@
    same on a phone as on a desktop -- only smaller. It used to re-lay-out
    under 640px, which is why the phone looked like a different design. */
 '.env-wrap{--w:min(600px,calc(100vw - 32px));position:relative;z-index:5;width:min(600px,100%);',
+/* The wrapper is a spacer: the envelope inside is absolutely positioned, so this
+   reserves the room it takes up. Its height is the envelope's own aspect applied
+   to --w, and it shrinks by the same factor the envelope scales by -- in CSS,
+   because measuring it in script came back 0 on mobile and left the envelope
+   hanging over everything below it. */
+'  height:calc(var(--w) / 1.62);',
 '  transition:height .85s cubic-bezier(.3,.75,.25,1) .06s}',
+'body[data-stage="letter"] .env-wrap,body[data-stage="tickets"] .env-wrap{',
+'  height:calc(var(--w) / 1.62 * .26)}',
 '.envelope{position:absolute;left:0;top:0;width:100%;aspect-ratio:1.62;perspective:1500px;',
 '  transform-style:preserve-3d;',
 '  transform-origin:50% 0;transition:transform .85s cubic-bezier(.3,.75,.25,1) .06s,filter .5s}',
@@ -668,27 +676,16 @@
     return [
       '(function(){',
       '  var body=document.body;',
-      '  var wrap=document.querySelector(".env-wrap");',
       '  var envelope=document.querySelector(".envelope");',
       '  var letterPanel=document.getElementById("panel-letter");',
       '  var ticketPanel=document.getElementById("panel-tickets");',
       '  var realLetter=letterPanel.querySelector(".letter");',
-      '  var SHRUNK=0.26;',
       '  var PULL=190;   /* the grab, before the paper itself takes over */',
       '  var reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;',
       '  var timers=[];',
       '',
       '  function after(ms,fn){timers.push(setTimeout(fn,reduced?0:ms));}',
       '  function clearTimers(){timers.forEach(clearTimeout);timers=[];}',
-      '',
-      '  /* The envelope keeps its natural size in layout; when it shrinks away we',
-      '     hand the wrapper the reduced height so the page closes up around it. */',
-      '  function sizeWrap(stage){',
-      '    var natural=envelope.offsetHeight;',
-      '    if(!natural)return;',
-      '    var out=stage==="letter"||stage==="tickets";',
-      '    wrap.style.height=(out?Math.round(natural*SHRUNK):natural)+"px";',
-      '  }',
       '',
       '  /* A letter arrives folded in half. Two clipped copies of the real letter,',
       '     hinged along the crease, do the opening; then the real one takes their',
@@ -743,7 +740,6 @@
       '    body.setAttribute("data-stage",stage);',
       '    letterPanel.hidden=stage!=="letter";',
       '    ticketPanel.hidden=stage!=="tickets";',
-      '    sizeWrap(stage);',
       '    if(stage==="letter")unfold();',
       '    if(stage==="tickets"){',
       '      /* restart the deal so the passes always come out of the envelope */',
@@ -768,7 +764,6 @@
       '    var panel=was==="letter"?letterPanel:ticketPanel;',
       '    body.removeAttribute("data-pull");',
       '    body.setAttribute("data-stage",stage);',
-      '    sizeWrap(stage);',
       '    function tidy(){',
       '      var fold=letterPanel.querySelector(".fold");',
       '      if(fold)fold.remove();',
@@ -795,10 +790,6 @@
       '    if(stage==="letter"||stage==="tickets")setStage("open");',
       '  });',
       '',
-      '  window.addEventListener("resize",function(){sizeWrap(body.getAttribute("data-stage"));});',
-      '  if(document.fonts&&document.fonts.ready){',
-      '    document.fonts.ready.then(function(){sizeWrap(body.getAttribute("data-stage"));});',
-      '  }',
       '  setStage("sealed");',
       '})();'
     ].join('\n');

@@ -36,22 +36,36 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8').replace(/<\/
 const bootstrap = `
 /* Read the guest out of the fragment and hand the whole invitation to the
    browser as its own document, so printing, scrolling and the back button all
-   behave exactly as they do in a file you download. */
+   behave exactly as they do in a file you download.
+   
+   This has to wait for the parser to finish. document.write() while the document
+   is still being parsed inserts at the script's position instead of replacing
+   the document -- you end up with this page's <head> merged into the
+   invitation's, two stylesheets fighting, and the envelope's spacer collapsing
+   to nothing so the letter rides over everything under it. Once parsing is
+   done, document.open() genuinely clears the document first. */
 (function () {
-  var data = window.INVITATION.decodePayload(location.hash) || {};
-  var html = window.INVITATION.buildDocument({
-    passenger: data.t || '',
-    nameOverrides: { full: data.f, first: data.r, short: data.s },
-    note: data.n || '',
-    lang: data.l === 'it' ? 'it' : 'en',
-    fontCss: window.INVITATION_FONT_CSS,
-    stampArt: window.STAMP_ART
-  });
-  document.open();
-  document.write(html);
-  document.close();
-  /* a link edited in place should redraw rather than sit there stale */
-  window.addEventListener('hashchange', function () { location.reload(); });
+  function render() {
+    var data = window.INVITATION.decodePayload(location.hash) || {};
+    var html = window.INVITATION.buildDocument({
+      passenger: data.t || '',
+      nameOverrides: { full: data.f, first: data.r, short: data.s },
+      note: data.n || '',
+      lang: data.l === 'it' ? 'it' : 'en',
+      fontCss: window.INVITATION_FONT_CSS,
+      stampArt: window.STAMP_ART
+    });
+    document.open();
+    document.write(html);
+    document.close();
+    /* a link edited in place should redraw rather than sit there stale */
+    window.addEventListener('hashchange', function () { location.reload(); });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
 })();
 `;
 
