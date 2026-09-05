@@ -178,6 +178,7 @@
 
 <script src="assets/fonts.js"></script>
 <script src="assets/textures.js"></script>
+<script src="assets/flowers.js"></script>
 <script src="assets/stamp-art.js"></script>
 <script src="assets/invitation.js"></script>
 <script src="assets/template.js"></script>
@@ -234,7 +235,8 @@
       lang: currentLang(),
       fontCss: window.INVITATION_FONT_CSS,
       stampArt: window.STAMP_ART,
-      textures: window.TEXTURES
+      textures: window.TEXTURES,
+      flowers: window.FLOWERS
     });
   }
 
@@ -405,6 +407,11 @@
   restore();
   syncDerived();
   render();
+
+  /* The one seam the tests use. Mirroring this call in a test file instead is
+     how the textures came to be missing from everything the tests minted while
+     the real minter had them all along. */
+  window.__mintHtml = html;
 })();
 </script>
 </body>

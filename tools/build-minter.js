@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Build minter.html: the minting desk as one self-contained file.
  *
- * index.html loads its four scripts from assets/, which is right for working on
+ * index.html loads its scripts from assets/, which is right for working on
  * the project but means the folder has to travel with it. This inlines them so
  * there is a single file you can keep anywhere, email to yourself, or open on a
  * machine that has never seen the repo -- double-click and mint.
@@ -29,8 +29,8 @@ html = html.replace(tag, (match, rel) => {
   return '<script>\n/* ' + rel + ' */\n' + code + '\n</script>';
 });
 
-if (inlined !== 5) {
-  throw new Error('expected to inline 5 asset scripts, inlined ' + inlined);
+if (inlined !== 6) {
+  throw new Error('expected to inline 6 asset scripts, inlined ' + inlined);
 }
 
 html = html.replace(

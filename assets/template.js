@@ -95,6 +95,7 @@
       '</div>' +
 
       '<div class="pass__stub">' +
+        '<span class="pass__band"></span>' +
         '<span class="stub__brand">' + esc(t.brand) + '</span>' +
         '<div class="stub__rows">' +
           '<div class="stub__row"><span>' + esc(t.lPassenger) + '</span><b>' + esc(names.short) + '</b></div>' +
@@ -138,7 +139,6 @@
         '<span class="letter__mark">' + I.roundelSvg(46) + '</span>' +
         '<span class="letter__brand">' + esc(t.brand) + '</span>' +
         '<span class="letter__strap">' + esc(t.strapline) + '</span>' +
-        '<span class="letter__sprig">' + I.sprigSvg() + '</span>' +
       '</header>' +
 
       '<div class="letter__ref">' +
@@ -206,27 +206,32 @@
     '</div>';
   }
 
-  function styles(fontCss, tex) {
+  function styles(fontCss, tex, flo) {
     return fontCss + '\n' + [
 '*,*::before,*::after{box-sizing:border-box}',
 'html{-webkit-text-size-adjust:100%}',
 /* headroom for the letter and the passes to rise out of the envelope */
 'body{margin:0;padding:clamp(168px,18vh,196px) 16px 96px;min-height:100vh;',
 '  font-family:"Cormorant Garamond",Garamond,"Hoefler Text","Times New Roman",serif;',
-'  color:#201c17;background-color:#cdb69e;',
-'  background-image:var(--linen-tex);background-size:400px 400px;',
+/* The mail lies on a plain, near-white surface -- the invitation carries all the
+   colour, so the ground stays out of its way. There is deliberately no pool of
+   light over it: any such overlay is only ever as tall as the viewport, so down
+   a long page it ends in a hard horizontal edge across the middle of the
+   surface. The flowers do the framing instead. */
+'  color:#201c17;background-color:#f4efe6;',
+'  background-image:var(--paper-tex);background-size:300px 300px;',
 '  display:flex;flex-direction:column;align-items:center;position:relative}',
-/* The surface everything lies on is woven cloth, with a pool of light over it and
-   the corners falling away. The cloth scrolls with the page; the light does not,
-   so it stays overhead. */
-'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;',
-'  background:radial-gradient(1150px 720px at 50% -6%,rgba(255,248,236,.6) 0%,',
-'    rgba(255,246,232,.14) 38%,rgba(92,66,42,.15) 72%,rgba(74,50,28,.4) 100%)}',
-':root{--paper:#f7f1e3;--paper-2:#efe6d3;--ink:#201c17;--ink-2:#6d6153;',
+':root{--on-cloth:#6d5744;--paper:#f7f1e3;--paper-2:#efe6d3;--ink:#201c17;--ink-2:#6d6153;',
 '  --line:#cbbca1;--blue:#123a4d;--red:#a83f2a;--gold:#b3893f;',
 '  --mono:"Courier Prime","Courier New",monospace;',
 '  --paper-tex:url(' + (tex.paper || '') + ');',
-'  --linen-tex:url(' + (tex.linen || '') + ');',
+'  --motif-tex:url(' + (tex.motif || '') + ');',
+'  --bloom-a:url(' + (flo.cornerA || '') + ');',
+'  --bloom-b:url(' + (flo.cornerB || '') + ');',
+/* Boarding passes are not printed on writing paper. Ticket stock is thinner and
+   whiter, drawn through a press lengthwise, so it gets its own tile and colour. */
+'  --ticket:#f9f6ec;--ticket-2:#f2ecdd;',
+'  --ticket-tex:url(' + (tex.ticket || '') + ');',
 /* Paper is not a flat fill. Light falls across a sheet, the cut edge catches it,
    and the far edge curves away -- these three do most of the work. */
 '  --sheen:linear-gradient(163deg,rgba(255,255,255,.62),rgba(255,255,255,.14) 30%,rgba(255,255,255,0) 58%);',
@@ -324,6 +329,14 @@
    instead leaves the seam welded to the top edge and swings the tip over it,
    which is what a flap does. */
 '.env-flap__face--in{transform:rotateY(180deg)}',
+/* Clipped to the flap's own outline, inset by a couple of per cent. The path
+   the flap is drawn from is 620x250 with a rounded tip; this is the same
+   shape as a polygon, which is all the clip needs. */
+'.env-liner{position:absolute;inset:0;backface-visibility:hidden;',
+'  -webkit-backface-visibility:hidden;transform:rotateY(180deg) translateZ(.1px);',
+'  background:var(--motif-tex) 0 0/calc(var(--w) * .115) auto repeat;',
+'  clip-path:polygon(1.6% 3%,98.4% 3%,98.4% 12.6%,51.8% 91%,48.2% 91%,1.6% 12.6%);',
+'  box-shadow:inset 0 0 30px rgba(80,20,50,.3)}',
 '.env-seal{position:absolute;left:50%;top:40%;width:calc(var(--w) * .0967);aspect-ratio:1;',
 '  margin:calc(var(--w) * -.0484) 0 0 calc(var(--w) * -.0484);',
 '  pointer-events:none;',
@@ -334,7 +347,7 @@
 '  cursor:pointer;',
 '  border-radius:4px;font:inherit;color:transparent}',
 '.env-open:focus-visible{outline:2px solid #8a5a34;outline-offset:5px}',
-'.env-hint{position:absolute;left:0;right:0;bottom:-32px;margin:0;text-align:center;color:#6d5744;',
+'.env-hint{position:absolute;left:0;right:0;bottom:-32px;margin:0;text-align:center;color:var(--on-cloth);',
 '  font-family:var(--mono);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;',
 '  animation:breathe 3.4s ease-in-out infinite;transition:opacity .4s}',
 '@keyframes breathe{0%,100%{opacity:.38}50%{opacity:.9}}',
@@ -372,7 +385,7 @@
 
 /* the passes: tucked in on the right, angled, only their corner showing */
 '.slip--tickets{right:2%;width:34%;z-index:2;transform:translateY(44px) rotate(-10deg)}',
-'.slip--tickets .slip__inner{background:var(--sheen),var(--paper-tex) 0 0/216px 216px repeat,#f3ead7;',
+'.slip--tickets .slip__inner{background:var(--sheen),var(--ticket-tex) 0 0/168px 168px repeat,var(--ticket-2);',
 '  padding:11px 14px 66px;text-align:right}',
 '.tedges{display:block;margin-top:9px}',
 '.tedge{display:flex;align-items:baseline;justify-content:flex-end;gap:9px;',
@@ -430,7 +443,10 @@
 '  cursor:pointer;color:transparent;',
 '  display:none;font:inherit}',
 'body[data-stage="letter"] .env-back-btn,body[data-stage="tickets"] .env-back-btn{display:block}',
-'.putback{margin:2px 0 0;text-align:center;color:#6d5744;font-family:var(--mono);font-size:9.5px;',
+/* this line lands on the flap of the emptied envelope, not on the cloth, so it
+   stays in ink -- with a little of the paper's own light behind it */
+'.putback{margin:2px 0 0;text-align:center;color:#5e4b39;font-family:var(--mono);font-size:9.5px;',
+'  text-shadow:0 1px 0 rgba(255,246,232,.6);',
 '  letter-spacing:.24em;text-transform:uppercase;opacity:0;transition:opacity .5s .5s;pointer-events:none}',
 'body[data-stage="letter"] .putback,body[data-stage="tickets"] .putback{opacity:.55}',
 
@@ -502,15 +518,29 @@
 '.letter__behind{position:absolute;left:11px;right:-11px;top:9px;bottom:-9px;z-index:0;',
 '  border-radius:1px;background:#efe6d3;transform:rotate(.5deg);transform-origin:50% 0;',
 '  box-shadow:0 2px 3px -1px rgba(70,48,24,.28),0 30px 44px -26px rgba(60,40,20,.38)}',
-'.letter{position:relative;z-index:1;border-radius:1px;padding:clamp(24px,4.4vw,50px);',
+'.letter{position:relative;z-index:1;border-radius:1px;overflow:hidden;',
+'  padding:clamp(34px,5.2vw,62px) clamp(24px,4.4vw,50px);',
 '  background:var(--sheen),var(--curve),var(--paper-tex) 0 0/216px 216px repeat,var(--paper);',
 '  box-shadow:var(--cut-edge),var(--lift);',
 '  line-height:1.6;font-size:clamp(17px,2.1vw,19px)}',
 '.letter__head{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--blue);text-align:center}',
 '.letter__brand{font-size:clamp(23px,3.6vw,30px);font-weight:700;letter-spacing:.02em}',
 '.letter__strap{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2)}',
-'.letter__sprig{display:block;margin-top:10px;line-height:0;opacity:.8}',
-'.sprig{display:block;width:132px;height:auto}',
+/* Painted on white and multiplied onto the ground, so the surface's own grain
+   carries straight through the flowers instead of a white box sitting on top of
+   them. Fixed and behind everything, so the mail lies inside the frame. */
+/* The blend belongs on the group, not on each painting. A fixed, stacked layer
+   is an isolated group: a child blending inside it has nothing but the group's
+   own transparency to blend with, so the white it was painted on stays white
+   and every flower arrives in a white box. */
+'.garden{position:fixed;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:multiply}',
+'.bloom{position:absolute;width:min(34vw,440px);aspect-ratio:1;',
+'  background:var(--bloom-a) center/contain no-repeat}',
+'.bloom--tl{top:-2vh;left:-2vw}',
+'.bloom--tr{top:-2vh;right:-2vw;background-image:var(--bloom-b)}',
+'.bloom--bl{bottom:-2vh;left:-2vw;background-image:var(--bloom-b);transform:rotate(180deg)}',
+'.bloom--br{bottom:-2vh;right:-2vw;transform:rotate(180deg)}',
+'@media (max-width:640px){.bloom{width:54vw}}',
 '.letter__ref{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 21px;',
 '  padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);',
 '  font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}',
@@ -537,17 +567,17 @@
 '  font-family:var(--mono);font-size:10.5px;line-height:1.7;color:var(--ink-2)}',
 
 /* ---------- tickets ---------- */
-'.tearline{display:flex;align-items:center;gap:14px;margin:0 0 18px;color:#6d5744}',
+'.tearline{display:flex;align-items:center;gap:14px;margin:0 0 18px;color:var(--on-cloth)}',
 '.tearline::before,.tearline::after{content:"";flex:1 1 auto;border-top:1px dashed rgba(109,87,68,.42)}',
 '.tearoff{font:inherit;font-size:13px;font-family:var(--mono);letter-spacing:.18em;text-transform:uppercase;',
 '  cursor:pointer;border:1px dashed rgba(109,87,68,.5);border-radius:2px;padding:7px 15px;',
-'  background:transparent;color:#5e4b39;transition:background .2s,color .2s,border-color .2s}',
+'  background:transparent;color:var(--on-cloth);transition:background .2s,color .2s,border-color .2s}',
 '.tearoff:hover{background:var(--paper);color:var(--blue);border-color:transparent}',
 '.tearoff:focus-visible{outline:2px solid #8a5a34;outline-offset:3px}',
 /* --stub is both the stub's width and where the tear line falls, so the punched
    notches at top and bottom line up with the perforation between them. */
 '.pass{--stub:186px;display:flex;border-radius:3px;margin:0 0 24px;',
-'  background:var(--sheen),var(--curve),var(--paper-tex) 0 0/216px 216px repeat,var(--paper);',
+'  background:var(--sheen),var(--curve),var(--ticket-tex) 0 0/168px 168px repeat,var(--ticket);',
 '  box-shadow:inset 0 1px 0 rgba(255,255,255,.62),inset 0 -1px 0 rgba(120,100,64,.2);',
 '  filter:drop-shadow(0 1px 0 rgba(70,48,24,.26)) drop-shadow(0 3px 3px rgba(70,48,24,.22))',
 '    drop-shadow(0 27px 34px rgba(60,40,20,.32));',
@@ -593,9 +623,11 @@
 '.pass__occasion p{margin:0;font-size:15.5px;line-height:1.5;color:#4a4137}',
 '.pass__follow{margin-top:8px!important;font-family:var(--mono);font-size:10px;',
 '  letter-spacing:.2em;text-transform:uppercase;color:var(--red)}',
-'.pass__stub{position:relative;flex:0 0 var(--stub);padding:clamp(16px,2.4vw,20px);',
+'.pass__stub{position:relative;flex:0 0 var(--stub);',
+'  padding:clamp(16px,2.4vw,20px) calc(clamp(16px,2.4vw,20px) + 36px)',
+'    clamp(16px,2.4vw,20px) clamp(16px,2.4vw,20px);',
 '  background:linear-gradient(163deg,rgba(255,255,255,.4),rgba(255,255,255,0) 44%),',
-'    var(--paper-tex) 0 0/216px 216px repeat,#f1e8d5;',
+'    var(--ticket-tex) 0 0/168px 168px repeat,var(--ticket-2);',
 '  display:flex;flex-direction:column;gap:11px}',
 /* the perforation: punched dots, not a dashed rule */
 '.pass__stub::before{content:"";position:absolute;left:-5px;top:10px;bottom:10px;width:10px;z-index:2;',
@@ -603,6 +635,12 @@
 '  background-size:10px 11px;background-repeat:repeat-y}',
 '.pass__stub::after{content:"";position:absolute;left:0;top:0;bottom:0;width:1px;',
 '  background:linear-gradient(180deg,transparent,rgba(255,255,255,.7) 12%,rgba(255,255,255,.7) 88%,transparent)}',
+/* The odelela band down the outside edge -- the Namibian half of this wedding,
+   printed on the ticket the way the invitations it comes from carry it. */
+'.pass__band{position:absolute;right:0;top:0;bottom:0;width:32px;z-index:1;',
+'  background:var(--motif-tex) 0 0/64px auto repeat;',
+'  border-left:1px solid rgba(255,246,232,.7);',
+'  box-shadow:inset 1px 0 0 rgba(90,10,40,.25)}',
 '.stub__brand{font-size:13px;font-weight:700;color:var(--blue);line-height:1.15}',
 '.stub__rows{display:flex;flex-direction:column;gap:6px}',
 '.stub__row{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-family:var(--mono);',
@@ -614,7 +652,7 @@
 '.barcode i{display:block;height:100%;background:var(--ink)}',
 
 /* ---------- footer ---------- */
-'.pagefoot{margin:58px 0 0;color:#6d5744;opacity:.6;font-family:var(--mono);font-size:10px;',
+'.pagefoot{margin:58px 0 0;color:var(--on-cloth);opacity:.6;font-family:var(--mono);font-size:10px;',
 '  letter-spacing:.24em;text-transform:uppercase;text-align:center}',
 
 /* ---------- small screens ---------- */
@@ -655,7 +693,8 @@
 /* ---------- print: the passes, and nothing else ---------- */
 '@media print{',
 '  body{background:#fff!important;background-image:none!important;padding:0;display:block}',
-'  .env-wrap,.putback,.pagefoot,.tearline,.tickets__intro,.panel--letter,.letter__behind{display:none!important}',
+'  .env-wrap,.putback,.pagefoot,.tearline,.tickets__intro,.panel--letter,',
+'  .letter__behind,.garden{display:none!important}',
 '  .panel--tickets,.panel--tickets[hidden]{display:block!important;width:100%;margin:0;animation:none}',
 /* on paper they lie square and separate again: the deal animation sets a
    transform, and an animation beats a plain declaration, so this has to shout */
@@ -822,11 +861,19 @@
 '<meta name="description" content="' + esc(t.brand + ' — ' + t.strapline) + '">\n' +
 '<meta name="robots" content="noindex,nofollow,noarchive,noimageindex">\n' +
 '<meta name="referrer" content="no-referrer">\n' +
-'<style>\n' + styles(fontCss, opts.textures || {}) + '\n</style>\n' +
+'<style>\n' + styles(fontCss, opts.textures || {}, opts.flowers || {}) + '\n</style>\n' +
 '<noscript><style>.env-wrap{display:none}.panel[hidden]{display:block!important}</style></noscript>\n' +
 '</head>\n' +
 '<body data-stage="sealed" data-envelope="' + envelope + '">\n' +
 
+/* The flowers grow round the edge of the surface, not on the stationery: two
+   paintings, each used twice, the second pair turned through half a turn so no
+   corner repeats its neighbour. Fixed, so the frame holds while the mail
+   scrolls through it. */
+'<div class="garden" aria-hidden="true">' +
+  '<span class="bloom bloom--tl"></span><span class="bloom bloom--tr"></span>' +
+  '<span class="bloom bloom--bl"></span><span class="bloom bloom--br"></span>' +
+'</div>\n' +
 '<div class="env-wrap">' +
   '<div class="envelope">' +
     '<div class="env-back"></div>' +
@@ -842,7 +889,10 @@
       '<span class="env-postmark">' + I.postmarkSvg() + '</span>' +
     '</div>' +
     '<div class="env-flap"><div class="env-flap__turn">' +
-      I.flapSvg('out') + I.flapSvg('in') + '</div></div>' +
+      I.flapSvg('out') + I.flapSvg('in') +
+      /* the lining, glued a little inside the flap's edge, so the paper still
+         shows as a border around it once the envelope is open */
+      '<span class="env-liner"></span>' + '</div></div>' +
     '<div class="env-seal">' + I.waxSealSvg(I.COUPLE.initials) + '</div>' +
     '<button type="button" class="env-open" data-stage-to="open">' + esc(t.envelopeOpenLabel) + '</button>' +
     '<button type="button" class="env-back-btn" data-stage-to="open">' + esc(t.backToEnvelope) + '</button>' +

@@ -404,26 +404,6 @@ window.INVITATION = (function () {
       blossom(50, 30, 15.5, 7, 0);
   }
 
-  /* A single stem, for the letterhead. */
-  function sprigSvg() {
-    return '' +
-      '<svg class="sprig" viewBox="0 0 120 34" width="120" height="34" aria-hidden="true">' +
-        '<g fill="none" stroke="' + BLOOM.stem + '" stroke-width="1.1" stroke-linecap="round">' +
-          '<path d="M12 22 C30 12 46 10 60 10 C74 10 90 12 108 22"/>' +
-        '</g>' +
-        leaf(38, 15, 9, -128) + leaf(82, 15, 9, 128) +
-        leaf(28, 18, 7.5, -140) + leaf(92, 18, 7.5, 140) +
-        '<g fill="' + BLOOM.filler + '">' +
-          '<circle cx="22" cy="19" r="1.3"/><circle cx="98" cy="19" r="1.3"/>' +
-        '</g>' +
-        blossom(60, 12, 8, 6, 0) +
-      '</svg>';
-  }
-
-  /* Postage stamp: the two of them in the picture panel, the date on the band
-     underneath, perforations punched as paper-coloured circles over the edge.
-     The picture comes in as a data URL from assets/stamp-art.js -- swap the file
-     in assets/stamp/ and rebuild to put a drawing there instead. */
   function stampSvg(dateLine, art) {
     var w = 88, h = 108, step = 11, holes = '', x, y;
     for (x = step / 2; x < w; x += step) {
@@ -475,17 +455,6 @@ window.INVITATION = (function () {
           '<path d="M6 67 q13 -6.5 26 0 t26 0 t26 0 t26 0" stroke-width="2.1"/>' +
         '</g>' +
       '</svg>';
-  }
-
-  /* Paper grain. A little fractal noise laid over the flat colour is the
-     difference between "a cream rectangle" and "a sheet of paper". */
-  function paperGrain(baseFrequency, octaves) {
-    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'>" +
-      "<filter id='g'><feTurbulence type='fractalNoise' baseFrequency='" + baseFrequency +
-      "' numOctaves='" + octaves + "' stitchTiles='stitch'/>" +
-      "<feColorMatrix type='saturate' values='0'/></filter>" +
-      "<rect width='220' height='220' filter='url(%23g)'/></svg>";
-    return "url(\"data:image/svg+xml," + svg.replace(/</g, '%3C').replace(/>/g, '%3E').replace(/#/g, '%23') + "\")";
   }
 
   function roundelSvg(size) {
@@ -587,9 +556,7 @@ window.INVITATION = (function () {
     nameForms: nameForms,
     slugify: slugify,
     barcode: barcode,
-    paperGrain: paperGrain,
     stampSvg: stampSvg,
-    sprigSvg: sprigSvg,
     flapSvg: flapSvg,
     waxSealSvg: waxSealSvg,
     roundelSvg: roundelSvg,

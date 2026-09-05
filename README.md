@@ -100,7 +100,8 @@ just below, in both languages.
 | `assets/fonts/` | the source `.woff2` files and their SIL Open Font Licences |
 | `example-invitation.html` | a minted sample, for looking at and test-printing |
 | `tools/build-fonts.py` | regenerates `assets/fonts.js` from `assets/fonts/` |
-| `tools/build-textures.py` | renders the paper and linen tiles into `assets/textures.js` |
+| `tools/build-textures.py` | renders the paper, ticket and odelela tiles into `assets/textures.js` |
+| `tools/build-flowers.py` | paints the watercolour flowers into `assets/flowers.js` |
 | `tools/prepare-stamp-art.py` | fits a round stamp illustration to the frame |
 | `tools/build-stamp-art.py` | regenerates `assets/stamp-art.js` from `assets/stamp/` |
 | `tools/build-example.js` | regenerates `example-invitation.html` |
@@ -113,8 +114,8 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
 
 ## Notes on the invitation
 
-- **The stamp carries the drawing of you two**, with the date on the band underneath, and a
-  sprig of the same flowers sits on the letterhead. To swap the drawing for another one:
+- **The stamp carries the drawing of you two**, with the date on the band underneath. To swap
+  the drawing for another one:
 
       python3 tools/prepare-stamp-art.py <the new picture>
       python3 tools/build-stamp-art.py
@@ -143,16 +144,35 @@ file, edit it, reload. The only generated file is `assets/fonts.js`.
   swings down, the shadow along the crease lifts, and then the scaffold is thrown away and the
   actual letter takes its place — so print, text selection and screen readers only ever see one
   letter. The faint crease line across the middle stays, the way paper remembers a fold.
-- **It is meant to read as paper on a table, not as cards on a page.** Everything lies on woven
-  linen under a pool of light with the corners falling away; light falls across each sheet, the
-  cut edge catches it, and the far edge curves off. The letter has a second page showing a sliver
-  of its edge behind the first.
-- **The paper and the linen are real textures**, rendered by
-  [`tools/build-textures.py`](tools/build-textures.py) into `assets/textures.js`. They are built
+- **It is meant to read as paper on a table, not as cards on a page.** Everything lies on a
+  plain near-white surface inside a painted floral frame; light falls across each sheet, the cut
+  edge catches it, and the far edge curves off. The letter has a second page showing a sliver of
+  its edge behind the first. There is deliberately no pool of light over the surface: any such
+  overlay is only ever as tall as the viewport, so down a long page it ends in a hard horizontal
+  edge across the middle of the ground.
+- **The papers are real textures**, rendered by
+  [`tools/build-textures.py`](tools/build-textures.py) into `assets/textures.js`: writing stock
+  for the letter and the envelope, thinner and whiter ticket stock for the passes. They are built
   in the frequency domain — a random field shaped by a 1/f falloff and inverse-transformed —
   which gives layered scales rather than one uniform fizz, fibre by stretching the falloff along
   an axis, and seamless tiles for free, since an inverse FFT is periodic. Rerun it to change
-  them; the tiles are about 20–30 KB each.
+  them; the tiles are about 10–20 KB each.
+- **The flowers are painted, not drawn**, by
+  [`tools/build-flowers.py`](tools/build-flowers.py) into `assets/flowers.js`, and they frame the
+  surface the mail lies on rather than the stationery. Watercolour reads as watercolour because
+  of what happens at the edge of a wash, so every petal gets a soft body, a rim of pigment
+  settled just inside its boundary, a boundary pushed around by a noise field, and granulation
+  over the whole thing; washes composite by multiplication, the way transparent paint layers do,
+  and a petal painted over a stem first lifts the stem back toward white so it can cover it.
+  Each painting is a JPEG on white shown with `mix-blend-mode: multiply` — white is where no
+  pigment landed, so the surface keeps its own texture through them, at a fraction of what an
+  alpha PNG of the same art would cost.
+- **The odelela print is the Namibian half of the wedding.** It lines the envelope, so it is the
+  first thing you see when the flap turns over, and runs as a band down the outside edge of every
+  boarding pass. Its palette is not a matter of taste — fuchsia, scarlet, black and blush printed
+  *on* white — so it is clustered straight out of the reference invitations rather than picked by
+  eye. The tile is a half-drop repeat of concentric rosettes, drawn at three times scale and
+  averaged down so the dye edges are soft, then pushed through a weave.
 - **The passes are dealt out** of the envelope one after another, landing overlapped and each
   at its own angle, the way tickets fall. They have punched perforations and notched corners
   along the tear line. On paper they straighten up and separate again.

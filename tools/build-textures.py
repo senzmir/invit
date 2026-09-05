@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the paper and linen textures as real images.
+"""Render the paper, ticket stock and printed-cotton tiles as real images.
 
     python3 tools/build-textures.py
 
@@ -25,7 +25,7 @@ import json
 import pathlib
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 RNG = np.random.default_rng(20261228)
@@ -79,30 +79,99 @@ def paper(size=320):
     return Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
 
 
-def linen(size=400):
-    """The surface everything lies on: a woven cloth, warp and weft."""
+def ticket(size=320):
+    """Ticket stock: thinner and smoother than writing paper, with the faint
+    horizontal grain a card picks up going through a machine, and a whisper of
+    the security tint printed under the ink."""
+    grain = field(size, 0.3)
+    machine = field(size, 1.1, stretch=(0.05, 1.0))    # drawn through, lengthwise
+    mottle = field(size, 2.2)
+
+    light = 1.0 + 0.026 * grain + 0.03 * machine + 0.018 * mottle
+    base = np.stack([
+        np.full((size, size), 250.0) * light,
+        np.full((size, size), 246.0) * light,
+        np.full((size, size), 235.0) * light,
+    ], axis=-1)
+
+    # the tint: a fine lattice, the way a real pass has guilloche under the type
+    yy, xx = np.mgrid[0:size, 0:size]
+    lattice = (np.sin(xx * np.pi * 2 * 6 / size) * np.sin(yy * np.pi * 2 * 6 / size)
+               + np.sin((xx + yy) * np.pi * 2 * 5 / size))
+    base -= 2.4 * lattice[..., None] * np.array([1.0, 0.7, 0.3])
+
+    return Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
+
+
+# The bold band is odelela -- the printed cotton of Owambo dress, and the
+# language the Namibian invitations in the reference are built from. Its palette
+# is not a matter of taste: it is fuchsia, scarlet and dark plum printed ON
+# white, and these five are clustered straight out of the reference rather than
+# picked by eye, which is how the first attempt ended up a raspberry wallpaper
+# with the ground and the print the wrong way round.
+GROUND = (248, 242, 240)        # the cloth itself, not the print
+BLACK = (26, 20, 22)            # the outline every shape is drawn with
+FUCHSIA = (230, 26, 141)
+RED = (211, 42, 36)
+PINK = (245, 176, 208)
+PLUM = (103, 42, 71)
+
+
+def motif(size=384, cell=192, ss=3):
+    """Printed cotton: concentric rosettes on a half-drop repeat."""
+    n = size * ss
+    coord = (np.arange(n) + 0.5) / ss
+    x = coord[None, :]
+    y = coord[:, None]
+
+    # half-drop: every other column of motifs sits half a cell lower, the way a
+    # printed repeat is staggered so the grid does not read as a grid
+    column = np.floor(x / cell)
+    u = np.mod(x, cell) / cell - 0.5
+    v = np.mod(y + np.mod(column, 2) * cell / 2, cell) / cell - 0.5
+
+    ring = np.hypot(u, v)
+    idx = np.zeros((n, n), dtype=np.uint8)          # 0 = the white cloth
+    for edge, value in ((0.455, 1), (0.435, 2), (0.395, 1), (0.380, 0),
+                        (0.335, 1), (0.320, 5), (0.290, 2), (0.245, 1),
+                        (0.230, 0), (0.190, 1), (0.170, 3), (0.110, 1),
+                        (0.092, 4), (0.048, 1), (0.036, 2)):
+        idx[ring < edge] = value
+
+    # Filler motifs sit between the rosettes down the column, never across the
+    # gap between columns: the half-drop puts the two sides of that gap out of
+    # phase, so anything straddling it would be sliced in half.
+    dv = np.abs(v) - 0.5
+    idx[np.abs(u) + np.abs(dv) < 0.075] = 1
+    idx[np.abs(u) + np.abs(dv) < 0.052] = 3
+
+    palette = np.array([GROUND, BLACK, FUCHSIA, RED, PINK, PLUM], dtype=np.float64)
+    base = palette[idx].reshape(size, ss, size, ss, 3).mean(axis=(1, 3))
+
     warp = field(size, 1.15, stretch=(1.0, 0.07))
     weft = field(size, 1.15, stretch=(0.07, 1.0))
     thread_a = field(size, 0.55, stretch=(1.0, 0.05))     # the individual threads
     thread_b = field(size, 0.55, stretch=(0.05, 1.0))
     slub = field(size, 2.6)
     grain = field(size, 0.4)
+    wear = field(size, 2.8)                               # where the dye sat unevenly
 
-    light = (1.0 + 0.075 * warp + 0.075 * weft
-             + 0.05 * thread_a + 0.05 * thread_b
-             + 0.05 * slub + 0.035 * grain)
-    base = np.stack([
-        np.full((size, size), 214.0) * light,
-        np.full((size, size), 196.0) * light,
-        np.full((size, size), 176.0) * light,
-    ], axis=-1)
-    return Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
+    light = (1.0 + 0.065 * warp + 0.065 * weft
+             + 0.045 * thread_a + 0.045 * thread_b
+             + 0.04 * slub + 0.03 * grain)
+    base *= light[..., None]
+    base += 5.0 * wear[..., None] * np.array([0.4, 0.9, 0.8])
+
+    img = Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
+    # dye creeps a hair into the weave; without this the print looks laser-cut
+    return img.filter(ImageFilter.GaussianBlur(0.6))
 
 
 def main():
     tiles = {
         'paper': (paper(), 93),
-        'linen': (linen(), 90),
+        'ticket': (ticket(), 92),
+        'motif': (motif(), 88),
     }
     out = {}
     for name, (img, quality) in tiles.items():
@@ -112,7 +181,7 @@ def main():
 
     dest = ROOT / 'assets' / 'textures.js'
     dest.write_text(
-        '/* Paper and linen, rendered by tools/build-textures.py.\n'
+        '/* Paper, ticket stock and the odelela print, rendered by tools/build-textures.py.\n'
         ' *\n'
         ' * Seamless tiles: they are built in the frequency domain, and an inverse FFT\n'
         ' * is periodic, so they repeat without a join.\n'

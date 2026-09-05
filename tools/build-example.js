@@ -14,6 +14,7 @@ const root = path.join(__dirname, '..');
 global.window = {};
 require(path.join(root, 'assets', 'fonts.js'));
 require(path.join(root, 'assets', 'textures.js'));
+require(path.join(root, 'assets', 'flowers.js'));
 require(path.join(root, 'assets', 'stamp-art.js'));
 require(path.join(root, 'assets', 'invitation.js'));
 require(path.join(root, 'assets', 'template.js'));
@@ -24,7 +25,8 @@ const html = window.INVITATION.buildDocument({
   lang: 'en',
   fontCss: window.INVITATION_FONT_CSS,
   stampArt: window.STAMP_ART,
-  textures: window.TEXTURES
+  textures: window.TEXTURES,
+  flowers: window.FLOWERS
 });
 
 const out = path.join(root, 'example-invitation.html');
